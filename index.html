@@ -1,0 +1,1397 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>การใช้ยาปฏิชีวนะอย่างสมเหตุผลในการคลอดแบบปกติ</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans+Thai:wght@400;500;600;700&family=Noto+Serif+Thai:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --red:#A31621; --red-d:#6E0F17; --red-l:#F8ECED;
+  --green:#1E6B4F; --gray:#6C6367; --orange:#C2661A;
+  --bg:#FAF7F7; --ink:#1B1214;
+  --line:#E8DFE0; --line-2:#D9CCCE; --muted:#7C7175; --white:#fff;
+  --r:3px;
+  --sans:'IBM Plex Sans Thai',system-ui,-apple-system,'Segoe UI',sans-serif;
+  --serif:'Noto Serif Thai',Georgia,serif;
+  --mono:'IBM Plex Mono','IBM Plex Sans Thai',monospace;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:var(--sans); color:var(--ink); background:var(--bg);
+  font-size:15px; line-height:1.55; -webkit-text-size-adjust:100%;
+}
+button,input,select,textarea{font:inherit;color:inherit}
+button{cursor:pointer;background:none;border:none}
+a{color:var(--red)}
+.mono{font-family:var(--mono)}
+.hide{display:none !important}
+
+/* ---------------------------------------------------------------- header */
+.hdr{background:var(--red-d);color:#fff;position:sticky;top:0;z-index:60}
+.hdr-in{max-width:1240px;margin:0 auto;padding:14px 18px;display:flex;align-items:center;gap:14px}
+.burger{width:38px;height:38px;border:1px solid rgba(255,255,255,.35);border-radius:var(--r);
+  display:flex;flex-direction:column;justify-content:center;align-items:center;gap:4px;flex:none}
+.burger span{display:block;width:17px;height:1.5px;background:#fff}
+.logo{width:38px;height:38px;border:1px solid rgba(255,255,255,.5);border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:12px;
+  letter-spacing:.5px;flex:none}
+.hdr-t{flex:1;min-width:0}
+.hdr-t h1{margin:0;font-family:var(--serif);font-size:19px;font-weight:600;line-height:1.3;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hdr-t p{margin:2px 0 0;font-size:12.5px;color:rgba(255,255,255,.72);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hdr-btn{border:1px solid rgba(255,255,255,.55);border-radius:var(--r);padding:8px 16px;
+  color:#fff;font-size:14px;white-space:nowrap;flex:none;background:transparent}
+.hdr-btn:hover{background:rgba(255,255,255,.12)}
+.hdr-user{display:flex;align-items:center;gap:10px;font-size:13.5px;color:rgba(255,255,255,.9);flex:none}
+.hdr-user b{font-weight:600;color:#fff}
+
+/* ------------------------------------------------------------------ tabs */
+.tabs{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:66px;z-index:50}
+.tabs-in{max-width:1240px;margin:0 auto;padding:0 18px;display:flex;gap:26px;overflow-x:auto}
+.tab{padding:14px 2px 12px;font-size:14.5px;color:var(--muted);border-bottom:2px solid transparent;
+  white-space:nowrap}
+.tab.on{color:var(--red);font-weight:600;border-bottom-color:var(--red)}
+.tab .pill{display:inline-block;margin-left:6px;background:var(--red);color:#fff;font-size:11px;
+  font-family:var(--mono);border-radius:999px;padding:1px 6px;vertical-align:1px}
+
+/* --------------------------------------------------------------- sidebar */
+.scrim{position:fixed;inset:0;background:rgba(27,18,20,.5);z-index:80;opacity:0;pointer-events:none;
+  transition:opacity .18s}
+.scrim.on{opacity:1;pointer-events:auto}
+.drawer{position:fixed;top:0;left:0;bottom:0;width:302px;max-width:86vw;background:#fff;z-index:90;
+  transform:translateX(-102%);transition:transform .2s ease;display:flex;flex-direction:column;
+  border-right:1px solid var(--line)}
+.drawer.on{transform:none}
+.dw-top{padding:16px 16px 14px;display:flex;gap:11px;align-items:flex-start;border-bottom:1px solid var(--line)}
+.dw-logo{width:34px;height:34px;border:1px solid var(--red);color:var(--red);border-radius:var(--r);
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:11px;flex:none}
+.dw-top h2{margin:0;font-family:var(--serif);font-size:15.5px;color:var(--red);font-weight:600}
+.dw-top p{margin:1px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
+.dw-x{margin-left:auto;font-size:19px;color:var(--muted);line-height:1;padding:2px 4px}
+.dw-body{flex:1;overflow:auto;padding:14px 0}
+.dw-grp{padding:12px 18px 6px;font-size:11.5px;letter-spacing:.08em;color:var(--muted)}
+.dw-i{display:flex;align-items:center;gap:8px;padding:11px 18px;color:var(--red);font-size:14.5px;
+  border-left:3px solid transparent;width:100%;text-align:left}
+.dw-i:hover{background:#FBF5F5}
+.dw-i.on{background:var(--red-l);border-left-color:var(--red);font-weight:600}
+.dw-i .pill{margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-family:var(--mono);
+  border-radius:999px;padding:1px 7px}
+.dw-admin{margin-top:auto;border-top:1px solid var(--line);padding-top:8px}
+.dw-foot{border-top:1px solid var(--line);padding:14px 18px 16px}
+.dw-foot .u{font-size:14px;font-weight:600}
+.dw-foot .s{font-size:12.5px;color:var(--muted);margin-top:2px}
+.dw-foot button{margin-top:11px;width:100%;border:1px solid var(--red);color:var(--red);
+  border-radius:var(--r);padding:9px;font-size:14px}
+.dw-foot button:hover{background:var(--red-l)}
+
+/* ------------------------------------------------------------------ page */
+.wrap{max-width:1240px;margin:0 auto;padding:22px 18px 60px}
+.card{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:18px 20px;margin-bottom:18px}
+.card-h{display:flex;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.eyebrow{font-size:11.5px;letter-spacing:.09em;color:var(--muted);margin:0 0 3px}
+.card h3{margin:0;font-family:var(--serif);font-size:17px;font-weight:600}
+.card .sub{margin:5px 0 0;font-size:13px;color:var(--muted)}
+.legend{margin-left:auto;display:flex;gap:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:5px;vertical-align:0}
+.empty{padding:26px;text-align:center;color:var(--muted);font-size:14px}
+
+/* error box */
+.errbox{border:1px solid var(--red);border-left:4px solid var(--red);background:var(--red-l);
+  border-radius:var(--r);padding:16px 18px;margin-bottom:18px}
+.errbox h3{margin:0 0 8px;font-family:var(--serif);font-size:16.5px;color:var(--red)}
+.errbox ol{margin:8px 0 0;padding-left:20px}
+.errbox li{margin:4px 0;font-size:13.5px}
+.errbox code{font-family:var(--mono);font-size:12.5px;background:#fff;border:1px solid var(--line-2);
+  border-radius:2px;padding:1px 5px}
+.errbox .msg{font-size:13.5px}
+.errbox .tail{margin:10px 0 0;font-size:13px;color:var(--red-d)}
+
+/* overview bar */
+.ovbar{display:flex;height:34px;border-radius:2px;overflow:hidden;border:1px solid var(--line-2);margin-top:14px}
+.ovbar div{display:flex;align-items:center;justify-content:center;color:#fff;font-family:var(--mono);
+  font-size:13px;min-width:0}
+.ovbar .g{background:var(--green)} .ovbar .r{background:var(--red)}
+
+/* registry */
+.reg-ctl{display:flex;gap:14px;align-items:flex-end;flex-wrap:wrap;margin-top:14px}
+.fld{display:flex;flex-direction:column;gap:5px;min-width:120px}
+.fld label{font-size:12.5px;color:var(--muted)}
+.fld select,.fld input{border:1px solid var(--line-2);border-radius:var(--r);padding:9px 10px;
+  background:#fff;font-size:14px;min-height:40px}
+.reg-note{font-size:13px;color:var(--muted);padding-bottom:10px}
+.reg-grid{display:flex;flex-wrap:wrap;gap:8px;margin-top:16px}
+.chip{position:relative;width:46px;height:44px;border-radius:var(--r);border:1px solid transparent;
+  display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:14px;color:#fff}
+.chip.g{background:var(--green)} .chip.r{background:var(--red)}
+.chip.p{background:#EFEAEA;color:var(--gray);border-color:var(--line-2)}
+.chip .ck{position:absolute;right:2px;bottom:0;font-size:11px;color:#fff;text-shadow:0 0 2px rgba(0,0,0,.35)}
+.chip.p .ck{color:var(--green);text-shadow:none}
+.reg-hint{margin:16px 0 0;font-size:13px;color:var(--muted)}
+
+/* KPI */
+.kpis{display:grid;grid-template-columns:repeat(6,1fr);background:#fff;border:1px solid var(--line);
+  border-radius:var(--r);margin-bottom:18px;overflow:hidden}
+.kpi{padding:16px 18px;border-right:1px solid var(--line)}
+.kpi:last-child{border-right:none}
+.kpi .k{font-size:13px;color:var(--muted)}
+.kpi .v{font-family:var(--mono);font-size:30px;font-weight:600;line-height:1.25;margin-top:2px}
+.kpi .v small{font-size:16px;color:var(--muted)}
+.kpi .n{font-size:12px;color:var(--muted)}
+.kpi.g .v{color:var(--green)} .kpi.r .v{color:var(--red)}
+
+.cols2{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.cols2 > .card{margin-bottom:0}
+
+/* proportion list */
+.plist{margin-top:14px;display:flex;flex-direction:column;gap:11px}
+.prow .t{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;margin-bottom:4px}
+.prow .t b{font-family:var(--mono);font-weight:500;color:var(--muted)}
+.ptrack{height:9px;background:#F0EAEA;border-radius:2px;overflow:hidden}
+.ptrack i{display:block;height:100%;background:var(--red);border-radius:2px}
+
+/* table */
+.tbl{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px}
+.tbl th{text-align:right;font-weight:500;color:var(--muted);padding:9px 10px;
+  border-bottom:1px solid var(--line-2);font-size:12.5px;white-space:nowrap}
+.tbl th:first-child,.tbl td:first-child{text-align:left}
+.tbl td{padding:11px 10px;border-bottom:1px solid var(--line);text-align:right;
+  font-family:var(--mono);white-space:nowrap}
+.tbl td:first-child{font-family:var(--sans)}
+.tbl tr.sum td{font-weight:600;border-bottom:none}
+.tbl-wrap{overflow-x:auto}
+
+/* switch */
+.sw{display:flex;align-items:center;gap:9px;margin-left:auto;font-size:13px;color:var(--muted)}
+.sw-t{width:38px;height:21px;border-radius:999px;background:#DFD6D7;position:relative;transition:background .15s;flex:none}
+.sw-t::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
+.sw.on .sw-t{background:var(--red)}
+.sw.on .sw-t::after{transform:translateX(17px)}
+
+/* ----------------------------------------------------------- case filters */
+.filters{display:grid;grid-template-columns:1.6fr 1.1fr 1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px}
+.filters .fld{min-width:0}
+.my{display:flex;gap:8px}
+.my select{flex:1;min-width:0}
+.count{font-size:13.5px;color:var(--muted);margin-bottom:12px}
+
+/* case row */
+.crow{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gray);
+  border-radius:var(--r);margin-bottom:12px}
+.crow.g{border-left-color:var(--green)} .crow.r{border-left-color:var(--red)}
+.crow-b{padding:15px 18px}
+.crow-b:hover{background:#FEFCFC}
+.pt{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:9px;
+  border-bottom:1px dashed var(--line-2)}
+.pt .nm{font-weight:700;font-size:15px}
+.pt .tag{font-family:var(--mono);font-size:11.5px;color:var(--muted);border:1px solid var(--line-2);
+  border-radius:2px;padding:1px 7px}
+.pt .no{margin-left:auto;font-family:var(--mono);font-size:12px;color:var(--muted)}
+.meta{margin-top:9px;font-size:12.5px;color:var(--muted)}
+.meta span{margin-right:14px;white-space:nowrap}
+.drug{margin-top:9px;font-family:var(--mono);font-size:16px;font-weight:600;line-height:1.45;
+  word-break:break-word}
+.note{margin-top:10px;font-size:13.5px}
+.note .lb{font-family:var(--mono);font-size:11px;letter-spacing:.06em;color:var(--muted);
+  display:block;margin-bottom:2px}
+.clamp2{display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.crow-cf{border-top:1px dashed var(--line-2);padding:13px 18px 15px}
+
+/* confirm box */
+.cbox{border-radius:var(--r);padding:12px 14px;font-size:14px;width:100%;text-align:left;display:block}
+.cbox.wait{border:1px solid var(--orange);background:#FDF4EC;color:#8E4A11}
+.cbox.wait.can:hover{background:#FBEBDD}
+.cbox.g{border:1px solid var(--green);background:#EEF5F2;color:#134C38}
+.cbox.r{border:1px solid var(--red);background:var(--red-l);color:var(--red-d)}
+.cbox .hd{display:flex;justify-content:space-between;gap:12px;align-items:center;font-weight:600}
+.cbox .who{margin-top:5px;font-size:12.5px;opacity:.85}
+.cbox .cm{margin-top:7px;font-size:13.5px;line-height:1.5}
+.cform{border:1px solid var(--orange);background:#FDF9F5;border-radius:var(--r);padding:13px 14px}
+.cform .row{display:flex;gap:10px;flex-wrap:wrap}
+.cform select{flex:1;min-width:170px;border:1px solid var(--line-2);border-radius:var(--r);padding:9px 10px;background:#fff}
+.cform input[type=text]{flex:2;min-width:200px;border:1px solid var(--line-2);border-radius:var(--r);padding:9px 10px}
+.cform .go{background:var(--red);color:#fff;border-radius:var(--r);padding:9px 20px;font-size:14px}
+.cform .go[disabled]{opacity:.45;cursor:not-allowed}
+.cform .cancel{color:var(--muted);font-size:13px;padding:9px 6px}
+.cform .err{color:var(--red);font-size:13px;margin-top:8px}
+
+/* ------------------------------------------------------------- slideover */
+.so{position:fixed;top:0;right:0;bottom:0;width:640px;max-width:100vw;background:var(--bg);z-index:90;
+  transform:translateX(102%);transition:transform .2s ease;display:flex;flex-direction:column}
+.so.on{transform:none}
+.so-h{background:var(--red-d);color:#fff;padding:15px 20px;display:flex;align-items:center;gap:12px}
+.so-h h2{margin:0;font-family:var(--serif);font-size:17px;font-weight:600}
+.so-h .x{margin-left:auto;color:#fff;font-size:22px;line-height:1;padding:2px 6px}
+.so-b{flex:1;overflow:auto;padding:18px}
+.verdict{border-radius:var(--r);padding:14px 16px;margin-bottom:16px}
+.verdict.g{border:1px solid var(--green);background:#EEF5F2}
+.verdict.r{border:1px solid var(--red);background:var(--red-l)}
+.verdict.p{border:1px solid var(--line-2);background:#F3EFEF}
+.verdict .final{font-size:11.5px;letter-spacing:.06em;color:var(--muted);margin-bottom:4px}
+.verdict .big{font-family:var(--serif);font-size:19px;font-weight:600}
+.verdict.g .big{color:var(--green)} .verdict.r .big{color:var(--red)}
+.kv{display:grid;grid-template-columns:150px 1fr;gap:9px 14px;font-size:14px;margin-top:12px}
+.kv dt{color:var(--muted);font-size:13px}
+.kv dd{margin:0;word-break:break-word}
+.flags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+.flag{border:1px solid var(--line-2);border-radius:var(--r);padding:5px 10px;font-size:12.5px;color:var(--muted)}
+.flag.on{border-color:var(--red);background:var(--red-l);color:var(--red-d);font-weight:600}
+.full{white-space:pre-wrap;font-size:14px;line-height:1.6}
+.danger{border:1px solid var(--red);color:var(--red);border-radius:var(--r);padding:9px 16px;font-size:13.5px;margin-top:12px}
+.danger:hover{background:var(--red-l)}
+
+/* ----------------------------------------------------------------- modal */
+.modal{position:fixed;inset:0;z-index:100;display:none;align-items:center;justify-content:center;padding:18px;
+  background:rgba(27,18,20,.55)}
+.modal.on{display:flex}
+.mbox{background:#fff;border-radius:var(--r);width:100%;max-width:420px;padding:24px;max-height:92vh;overflow:auto}
+.mbox h2{margin:0 0 4px;font-family:var(--serif);font-size:19px}
+.mbox p.s{margin:0 0 16px;font-size:13px;color:var(--muted)}
+.mbox .fld{margin-bottom:12px}
+.mbox input,.mbox select{width:100%;border:1px solid var(--line-2);border-radius:var(--r);padding:10px}
+.mbox .go{width:100%;background:var(--red);color:#fff;border-radius:var(--r);padding:11px;font-size:15px;margin-top:6px}
+.mbox .alt{margin-top:14px;font-size:13.5px;text-align:center;color:var(--muted)}
+.mbox .alt button{color:var(--red);font-weight:600}
+.mbox .err{color:var(--red);font-size:13.5px;margin-top:10px}
+.mbox .ok{color:var(--green);font-size:13.5px;margin-top:10px}
+.mbox .close{position:absolute}
+
+/* users page */
+.ureq{border:1px solid var(--orange);border-radius:var(--r);background:#FDF9F5;padding:14px 16px;margin-bottom:12px}
+.ureq .r{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:10px}
+.ureq select{border:1px solid var(--line-2);border-radius:var(--r);padding:8px 10px;background:#fff}
+.btn-ok{background:var(--green);color:#fff;border-radius:var(--r);padding:8px 18px;font-size:13.5px}
+.btn-no{border:1px solid var(--line-2);color:var(--muted);border-radius:var(--r);padding:8px 18px;font-size:13.5px}
+.utbl select{border:1px solid var(--line-2);border-radius:var(--r);padding:6px 8px;background:#fff;font-size:13px}
+.badge{font-size:11.5px;border-radius:2px;padding:1px 7px;border:1px solid var(--line-2);color:var(--muted)}
+.badge.ok{border-color:var(--green);color:var(--green)}
+.badge.no{border-color:var(--red);color:var(--red)}
+
+/* footer */
+.foot{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;font-size:12.5px;color:var(--muted)}
+.foot code{font-family:var(--mono)}
+
+.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;
+  padding:11px 20px;border-radius:var(--r);font-size:14px;z-index:120;opacity:0;pointer-events:none;
+  transition:opacity .2s}
+.toast.on{opacity:.95}
+
+@media (max-width:960px){
+  .kpis{grid-template-columns:repeat(3,1fr)}
+  .kpi:nth-child(3n){border-right:none}
+  .kpi:nth-child(-n+3){border-bottom:1px solid var(--line)}
+  .cols2{grid-template-columns:1fr}
+  .filters{grid-template-columns:1fr 1fr}
+}
+@media (max-width:620px){
+  .hdr-t h1{font-size:15.5px} .hdr-t p{display:none}
+  .tabs{top:60px}
+  .kpis{grid-template-columns:repeat(2,1fr)}
+  .kpi:nth-child(3n){border-right:1px solid var(--line)}
+  .kpi:nth-child(2n){border-right:none}
+  .kpi:nth-child(-n+4){border-bottom:1px solid var(--line)}
+  .filters{grid-template-columns:1fr}
+  .kv{grid-template-columns:1fr;gap:2px 0}
+  .kv dd{margin-bottom:8px}
+  .wrap{padding:16px 13px 50px}
+  .card{padding:15px 14px}
+  .crow-b,.crow-cf{padding-left:14px;padding-right:14px}
+  .drug{font-size:15px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+  <div class="hdr-in">
+    <button class="burger" id="burger" aria-label="เมนู"><span></span><span></span><span></span></button>
+    <div class="logo">RDU</div>
+    <div class="hdr-t">
+      <h1>การใช้ยาปฏิชีวนะอย่างสมเหตุผลในการคลอดแบบปกติ</h1>
+      <p>Rational Use of Antibiotics in Normal Labor</p>
+    </div>
+    <div id="hdrAuth"></div>
+  </div>
+</header>
+
+<nav class="tabs"><div class="tabs-in" id="tabs"></div></nav>
+
+<div class="scrim" id="scrim"></div>
+
+<aside class="drawer" id="drawer">
+  <div class="dw-top">
+    <div class="dw-logo">RDU</div>
+    <div>
+      <h2>ระบบประเมิน RDU</h2>
+      <p>การใช้ยาปฏิชีวนะในการคลอดปกติ</p>
+    </div>
+    <button class="dw-x" id="dwClose" aria-label="ปิด">✕</button>
+  </div>
+  <div class="dw-body" id="dwBody"></div>
+  <div class="dw-foot" id="dwFoot"></div>
+</aside>
+
+<main class="wrap" id="main"></main>
+
+<div class="so" id="so">
+  <div class="so-h">
+    <h2 id="soTitle">รายละเอียดเคส</h2>
+    <button class="x" id="soClose" aria-label="ปิด">✕</button>
+  </div>
+  <div class="so-b" id="soBody"></div>
+</div>
+
+<div class="modal" id="modal"><div class="mbox" id="mbox"></div></div>
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ============================================================== constants */
+
+var API = '/api/rdu';
+var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
+                 'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
+var FLAG_LABELS = [
+  ['tubal',      'ทำหมันหลังคลอด (Tubal resection)'],
+  ['balloon',    'ใส่บอลลูนห้ามเลือด (Balloon tamponade)'],
+  ['hemorrhage', 'ตกเลือดหลังคลอด (Postpartum hemorrhage)'],
+  ['clot',       'ก้อนเลือดคั่ง / ล้วงรก (Blood clot)'],
+  ['syphilis',   'ซิฟิลิส (Syphilis)'],
+  ['tear',       'แผลฝีเย็บฉีกขาด (Perineal tear)']
+];
+
+var S = {
+  loading: true,
+  error: null,
+  cases: [],
+  confirmations: {},
+  session: null,          // {token, user}
+  pendingRequests: 0,
+  page: 'dashboard',
+  showDoctorNames: false,
+  users: [],
+  detailNo: null,
+  dash: { year: '', month: '' },
+  f: { q: '', month: '', year: '', doctor: '', drug: '', result: '', confirmed: '' }
+};
+
+/* ================================================================ helpers */
+
+function $(id) { return document.getElementById(id); }
+function esc(s) {
+  return String(s === null || s === undefined ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+function toast(msg) {
+  var t = $('toast');
+  t.textContent = msg; t.classList.add('on');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(function () { t.classList.remove('on'); }, 2600);
+}
+function isOn(v) {
+  var s = String(v === null || v === undefined ? '' : v).trim().toLowerCase();
+  return s === '1' || s === 'true' || s === 'yes' || s === 'y' || s === 'ใช่';
+}
+function pct(a, b) { return b > 0 ? (a * 100 / b) : 0; }
+function fmtPct(x) { return (Math.round(x * 10) / 10).toFixed(1) + '%'; }
+
+/** "1/4/2569" -> {d,m,y}  (m = 1..12, y = พ.ศ.) */
+function parseThaiDate(str) {
+  var s = String(str || '').trim();
+  if (!s) return null;
+  var m = s.match(/^(\d{1,2})[\/\-.](\d{1,2})[\/\-.](\d{4})/);
+  if (m) return { d: +m[1], m: +m[2], y: +m[3] };
+  var iso = s.match(/^(\d{4})[\/\-.](\d{1,2})[\/\-.](\d{1,2})/);
+  if (iso) return { d: +iso[3], m: +iso[2], y: +iso[1] < 2400 ? +iso[1] + 543 : +iso[1] };
+  return null;
+}
+
+/** ชื่อยาสำหรับ "จัดกลุ่ม/ตัวกรอง" เท่านั้น — การแสดงผลในแถวใช้ข้อความเต็มจากชีตเสมอ */
+function drugKey(text) {
+  var s = String(text || '').trim();
+  if (!s) return '(ไม่ระบุยา)';
+  var stop = /^(CAP|CAPS|CAPSULE|TAB|TABS|TABLET|INJ|INJECTION|SYR|SYRUP|SUSP|SOLN|SOL|VIAL|AMP|IV|IM|PO|MG|GM|G|ML|MU)\.?$/i;
+  var parts = s.split(/\s+/), out = [];
+  for (var i = 0; i < parts.length; i++) {
+    var p = parts[i];
+    if (/\d/.test(p) || stop.test(p) || /^\(/.test(p)) break;
+    out.push(p);
+  }
+  return (out.join(' ') || parts[0]).replace(/[.,;]+$/, '').toUpperCase();
+}
+
+function indicationsOf(c) {
+  var out = [];
+  var tear = String(c.tear || '').trim();
+  if (tear && tear !== '0') out.push('แผลฝีเย็บฉีกขาดระดับ ' + tear + ' (Perineal tear grade ' + tear + ')');
+  if (isOn(c.tubal)) out.push('ทำหมันหลังคลอด (Tubal resection)');
+  if (isOn(c.balloon)) out.push('ใส่บอลลูนห้ามเลือด (Balloon tamponade)');
+  if (isOn(c.hemorrhage)) out.push('ตกเลือดหลังคลอด (Postpartum hemorrhage)');
+  if (isOn(c.clot)) out.push('ก้อนเลือดคั่ง / ล้วงรก (Blood clot)');
+  if (isOn(c.syphilis)) out.push('ซิฟิลิส (Syphilis)');
+  if (!out.length) out.push('ไม่พบข้อบ่งชี้ที่บันทึกไว้ในเวชระเบียน');
+  return out;
+}
+
+function confOf(c) { return S.confirmations[String(c.no).trim()] || null; }
+function statusOf(c) {
+  var k = confOf(c);
+  if (!k) return 'pending';
+  return k.status === 'rational' ? 'rational' : 'irrational';
+}
+function statusClass(st) { return st === 'rational' ? 'g' : st === 'irrational' ? 'r' : 'p'; }
+function statusText(st) {
+  return st === 'rational' ? 'สมเหตุผล' : st === 'irrational' ? 'ไม่สมเหตุผล' : 'รอประเมิน';
+}
+function canConfirm() {
+  return !!(S.session && (S.session.user.role === 'advisor' || S.session.user.role === 'admin'));
+}
+function isAdmin() { return !!(S.session && S.session.user.role === 'admin'); }
+
+/** ชื่อแพทย์แบบไม่ระบุตัวตน */
+function doctorLabel(name) {
+  var n = String(name || '').trim() || '(ไม่ระบุ)';
+  if (S.showDoctorNames) return n;
+  var idx = doctorLabel._map[n];
+  return idx ? 'แพทย์ ' + (idx < 10 ? '0' + idx : idx) : 'แพทย์ —';
+}
+doctorLabel._map = {};
+function rebuildDoctorMap() {
+  var names = [];
+  S.cases.forEach(function (c) {
+    var n = String(c.doctor || '').trim() || '(ไม่ระบุ)';
+    if (names.indexOf(n) < 0) names.push(n);
+  });
+  names.sort(function (a, b) { return a.localeCompare(b, 'th'); });
+  doctorLabel._map = {};
+  names.forEach(function (n, i) { doctorLabel._map[n] = i + 1; });
+}
+
+/* ==================================================================== api */
+
+function api(action, payload) {
+  var body = Object.assign({ action: action }, payload || {});
+  if (S.session && S.session.token && body.token === undefined) body.token = S.session.token;
+  return fetch(API, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  }).then(function (res) {
+    return res.text().then(function (txt) {
+      var data = null;
+      try { data = JSON.parse(txt); } catch (e) {
+        throw new Error('เซิร์ฟเวอร์ตอบกลับไม่ใช่ JSON (HTTP ' + res.status + '): ' +
+                        String(txt).slice(0, 180));
+      }
+      if (!res.ok || data.ok === false) throw new Error(data.error || ('HTTP ' + res.status));
+      return data;
+    });
+  }, function () {
+    throw new Error('เชื่อมต่อเซิร์ฟเวอร์ไม่ได้');
+  });
+}
+
+function loadData() {
+  S.loading = true; S.error = null; render();
+  return api('bootstrap', { token: '' }).then(function (d) {
+    S.cases = (d.cases || []).slice();
+    S.confirmations = {};
+    (d.confirmations || []).forEach(function (r) {
+      var k = String(r.case_no || '').trim();
+      if (k) S.confirmations[k] = r;
+    });
+    S.cases.sort(function (a, b) { return (Number(a.no) || 0) - (Number(b.no) || 0); });
+    rebuildDoctorMap();                 // ดัชนีตัวกรองสร้างหลังโหลดข้อมูลเสมอ
+    S.loading = false;
+    render();
+  }).catch(function (err) {
+    S.loading = false;
+    S.error = err.message || String(err);
+    S.cases = []; S.confirmations = {};   // เชื่อมต่อไม่ได้ = ไม่แสดงเคสใด ๆ
+    render();
+  });
+}
+
+/* ================================================================ session */
+
+function saveSession(s) {
+  S.session = s;
+  try {
+    if (s) sessionStorage.setItem('rdu_session', JSON.stringify(s));
+    else sessionStorage.removeItem('rdu_session');
+  } catch (e) {}
+  if (!s) { S.showDoctorNames = false; S.users = []; S.pendingRequests = 0; }
+}
+
+function restoreSession() {
+  var raw = null;
+  try { raw = sessionStorage.getItem('rdu_session'); } catch (e) {}
+  if (!raw) return Promise.resolve();
+  var s;
+  try { s = JSON.parse(raw); } catch (e) { return Promise.resolve(); }
+  S.session = s;
+  return api('me', {}).then(function (d) {
+    saveSession({ token: s.token, user: d.user });
+    S.pendingRequests = d.pendingRequests || 0;
+  }).catch(function () { saveSession(null); });
+}
+
+function logout() {
+  saveSession(null);
+  if (S.page === 'users') S.page = 'dashboard';
+  render();
+  toast('ออกจากระบบแล้ว');
+}
+
+function startPendingWatch() {
+  clearInterval(startPendingWatch._t);
+  startPendingWatch._t = setInterval(function () {
+    if (!isAdmin()) return;
+    api('pendingCount', {}).then(function (d) {
+      if (d.pendingRequests !== S.pendingRequests) {
+        S.pendingRequests = d.pendingRequests; render();
+      }
+    }).catch(function () {});
+  }, 60000);
+}
+
+/* ============================================================== derived  */
+
+function caseDate(c) { return parseThaiDate(c.admit); }
+
+function yearOptions() {
+  var ys = [];
+  S.cases.forEach(function (c) {
+    var d = caseDate(c);
+    if (d && ys.indexOf(d.y) < 0) ys.push(d.y);
+  });
+  return ys.sort(function (a, b) { return b - a; });
+}
+function monthOptions(year) {
+  var ms = [];
+  S.cases.forEach(function (c) {
+    var d = caseDate(c);
+    if (!d) return;
+    if (year && d.y !== +year) return;
+    if (ms.indexOf(d.m) < 0) ms.push(d.m);
+  });
+  return ms.sort(function (a, b) { return a - b; });
+}
+function doctorOptions() {
+  var ds = [];
+  S.cases.forEach(function (c) {
+    var n = String(c.doctor || '').trim() || '(ไม่ระบุ)';
+    if (ds.indexOf(n) < 0) ds.push(n);
+  });
+  return ds.sort(function (a, b) { return a.localeCompare(b, 'th'); });
+}
+function drugOptions() {
+  var ds = [];
+  S.cases.forEach(function (c) {
+    var k = drugKey(c.drug);
+    if (ds.indexOf(k) < 0) ds.push(k);
+  });
+  return ds.sort();
+}
+
+function inPeriod(c, year, month) {
+  if (!year && !month) return true;
+  var d = caseDate(c);
+  if (!d) return false;
+  if (year && d.y !== +year) return false;
+  if (month && d.m !== +month) return false;
+  return true;
+}
+
+function filteredCases() {
+  var q = S.f.q.trim().toLowerCase();
+  return S.cases.filter(function (c) {
+    if (!inPeriod(c, S.f.year, S.f.month)) return false;
+    if (S.f.doctor && (String(c.doctor || '').trim() || '(ไม่ระบุ)') !== S.f.doctor) return false;
+    if (S.f.drug && drugKey(c.drug) !== S.f.drug) return false;
+    var st = statusOf(c);
+    if (S.f.result && st !== S.f.result) return false;
+    if (S.f.confirmed === 'yes' && st === 'pending') return false;
+    if (S.f.confirmed === 'no' && st !== 'pending') return false;
+    if (q) {
+      var hay = [c.no, c.hn, c.an, c.patientName, c.icd10, c.icd10Other, c.icd9,
+                 c.drug, c.doctorOrder, c.nurseNote, S.showDoctorNames ? c.doctor : '']
+                .join(' ').toLowerCase();
+      if (hay.indexOf(q) < 0) return false;
+    }
+    return true;
+  });
+}
+
+function tally(list) {
+  var t = { total: list.length, rational: 0, irrational: 0, pending: 0 };
+  list.forEach(function (c) {
+    var st = statusOf(c);
+    if (st === 'rational') t.rational++;
+    else if (st === 'irrational') t.irrational++;
+    else t.pending++;
+  });
+  t.done = t.rational + t.irrational;
+  return t;
+}
+
+/* ============================================================ render: app */
+
+function render() {
+  renderHeaderAuth();
+  renderTabs();
+  renderDrawer();
+  var main = $('main');
+  if (S.page === 'cases') main.innerHTML = viewCases();
+  else if (S.page === 'users') main.innerHTML = viewUsers();
+  else main.innerHTML = viewDashboard();
+  main.insertAdjacentHTML('beforeend', viewFooter());
+  afterRender();
+}
+
+function renderHeaderAuth() {
+  var el = $('hdrAuth');
+  if (S.session) {
+    el.innerHTML = '<div class="hdr-user"><b>' + esc(S.session.user.name || S.session.user.username) +
+      '</b> · <button class="hdr-btn" data-act="logout" style="padding:6px 12px">ออกจากระบบ</button></div>';
+  } else {
+    el.innerHTML = '<button class="hdr-btn" data-act="login">เข้าสู่ระบบ</button>';
+  }
+}
+
+function renderTabs() {
+  var pending = S.cases.filter(function (c) { return statusOf(c) === 'pending'; }).length;
+  var items = [
+    ['dashboard', 'แดชบอร์ด', 0],
+    ['cases', 'เคสทั้งหมด', pending]
+  ];
+  if (isAdmin()) items.push(['users', 'จัดการผู้ใช้', S.pendingRequests]);
+  $('tabs').innerHTML = items.map(function (it) {
+    return '<button class="tab' + (S.page === it[0] ? ' on' : '') + '" data-page="' + it[0] + '">' +
+      esc(it[1]) + (it[2] ? '<span class="pill">' + it[2] + '</span>' : '') + '</button>';
+  }).join('');
+}
+
+function renderDrawer() {
+  var pending = S.cases.filter(function (c) { return statusOf(c) === 'pending'; }).length;
+  var html = '<div class="dw-grp">ภาพรวม</div>' +
+    '<button class="dw-i' + (S.page === 'dashboard' ? ' on' : '') + '" data-page="dashboard">แดชบอร์ด</button>' +
+    '<div class="dw-grp">ข้อมูลเคส</div>' +
+    '<button class="dw-i' + (S.page === 'cases' ? ' on' : '') + '" data-page="cases">เคสทั้งหมด' +
+      (pending ? '<span class="pill">' + pending + '</span>' : '') + '</button>';
+  if (isAdmin()) {
+    html += '<div class="dw-admin"><div class="dw-grp">ผู้ดูแลระบบ</div>' +
+      '<button class="dw-i' + (S.page === 'users' ? ' on' : '') + '" data-page="users">จัดการผู้ใช้' +
+      (S.pendingRequests ? '<span class="pill">' + S.pendingRequests + '</span>' : '') + '</button></div>';
+  }
+  $('dwBody').innerHTML = html;
+
+  var t = tally(S.cases);
+  if (S.session) {
+    $('dwFoot').innerHTML =
+      '<div class="u">' + esc(S.session.user.name || S.session.user.username) + '</div>' +
+      '<div class="s">ประเมินแล้ว ' + t.done + ' จาก ' + t.total + ' เคส</div>' +
+      '<button data-act="logout">ออกจากระบบ</button>';
+  } else {
+    $('dwFoot').innerHTML =
+      '<div class="u">ยังไม่ได้เข้าสู่ระบบ</div>' +
+      '<div class="s">เข้าสู่ระบบเพื่อยืนยันผลประเมิน</div>' +
+      '<button data-act="login">เข้าสู่ระบบ</button>';
+  }
+}
+
+function viewFooter() {
+  var t = tally(S.cases);
+  return '<div class="foot">ข้อมูลเคสทั้งหมดอ่านจาก Google Sheets โดยตรงทุกครั้งที่เปิดหน้า ' +
+    '· ผลการประเมินทุกเคสมาจากการพิจารณาของอาจารย์แพทย์เท่านั้น ระบบไม่ตัดสินเองอัตโนมัติ ' +
+    '· ประเมินแล้ว ' + t.done + ' จาก ' + t.total + ' เคส</div>';
+}
+
+function errorBox() {
+  if (!S.error) return '';
+  var origin = location.origin || '';
+  return '<div class="errbox">' +
+    '<h3>ยังเชื่อมต่อฐานข้อมูลไม่ได้</h3>' +
+    '<div class="msg">ข้อความจากระบบ: <code>' + esc(S.error) + '</code></div>' +
+    '<ol>' +
+    '<li>เปิด <code>' + esc(origin) + '/api/rdu</code> ในแท็บใหม่ — ต้องได้ JSON ที่มีคำว่า "รองรับเฉพาะ POST" ถ้าได้ 404 แปลว่าไฟล์ <code>api/rdu.js</code> ไม่ได้ขึ้นไปบน Vercel</li>' +
+    '<li>ตรวจ Environment Variables ใน Vercel ว่ามี <code>APPS_SCRIPT_URL</code> และ <code>SHARED_SECRET</code> ครบ และติ๊กครบทั้ง 3 environment</li>' +
+    '<li>หลังตั้งค่าแล้วต้องกด <b>Redeploy</b> หนึ่งครั้งเสมอ</li>' +
+    '<li>เปิด URL ของ Apps Script ที่ลงท้าย <code>/exec</code> ตรง ๆ — ต้องเห็นข้อความ "RDU API พร้อมใช้งาน"</li>' +
+    '<li>ค่า <code>SHARED_SECRET</code> ใน Vercel ต้องตรงกับใน Script Properties ทุกตัวอักษร</li>' +
+    '<li>แก้โค้ด Apps Script แล้วต้อง Deploy เวอร์ชันใหม่ทุกครั้ง</li>' +
+    '</ol>' +
+    '<p class="tail">ระบบจะไม่แสดงข้อมูลใด ๆ จนกว่าจะเชื่อมต่อชีตได้ เพื่อไม่ให้เข้าใจผิดว่าเป็นข้อมูลจริง</p>' +
+    '</div>';
+}
+
+/* ======================================================= render: dashboard */
+
+function viewDashboard() {
+  if (S.loading) return errorBox() + '<div class="card"><div class="empty">กำลังโหลดข้อมูลจาก Google Sheets…</div></div>';
+
+  var t = tally(S.cases);
+  var html = errorBox();
+
+  /* --- ภาพรวม --- */
+  html += '<div class="card"><div class="card-h"><div>' +
+    '<p class="eyebrow">ภาพรวม</p>' +
+    '<h3 style="font-size:15px;font-weight:500;color:var(--muted);font-family:var(--sans)">' +
+    'เคสที่อาจารย์แพทย์ยืนยันแล้ว ใช้ผลของอาจารย์แพทย์เป็นเกณฑ์</h3></div>' +
+    '<div class="legend">' +
+    '<span><i style="background:var(--green)"></i>สมเหตุผล</span>' +
+    '<span><i style="background:var(--red)"></i>ไม่สมเหตุผล</span></div></div>';
+  if (t.done === 0) {
+    html += '<div class="empty" style="background:var(--red-l);border-radius:var(--r);margin-top:14px">ยังไม่มีเคสที่อาจารย์แพทย์ประเมิน</div>';
+  } else {
+    var pg = pct(t.rational, t.done), pr = 100 - pg;
+    html += '<div class="ovbar">' +
+      (pg > 0 ? '<div class="g" style="width:' + pg + '%">' + (pg >= 12 ? fmtPct(pg) : '') + '</div>' : '') +
+      (pr > 0 ? '<div class="r" style="width:' + pr + '%">' + (pr >= 12 ? fmtPct(pr) : '') + '</div>' : '') +
+      '</div>';
+  }
+  html += '</div>';
+
+  /* --- ทะเบียนเคส --- */
+  var years = yearOptions();
+  var months = monthOptions(S.dash.year);
+  var periodCases = S.cases.filter(function (c) { return inPeriod(c, S.dash.year, S.dash.month); });
+  var pt = tally(periodCases);
+
+  html += '<div class="card"><div class="card-h"><div>' +
+    '<p class="eyebrow">ทะเบียนเคส</p><h3>ผลประเมินรายเคสทั้งหมด</h3></div>' +
+    '<div class="legend">' +
+    '<span><i style="background:var(--green)"></i>สมเหตุผล</span>' +
+    '<span><i style="background:var(--red)"></i>ไม่สมเหตุผล</span>' +
+    '<span><i style="background:#CFC6C7"></i>รอประเมิน</span>' +
+    '<span style="color:var(--green)">✓ ยืนยันแล้ว</span></div></div>' +
+    '<div class="reg-ctl">' +
+    '<div class="fld"><label>ปี พ.ศ.</label><select data-dash="year"><option value="">ทุกปี</option>' +
+      years.map(function (y) {
+        return '<option value="' + y + '"' + (String(S.dash.year) === String(y) ? ' selected' : '') + '>' + y + '</option>';
+      }).join('') + '</select></div>' +
+    '<div class="fld"><label>เดือน</label><select data-dash="month"><option value="">ทุกเดือน</option>' +
+      months.map(function (m) {
+        return '<option value="' + m + '"' + (String(S.dash.month) === String(m) ? ' selected' : '') + '>' + TH_MONTHS[m - 1] + '</option>';
+      }).join('') + '</select></div>' +
+    '<div class="reg-note">' + (pt.total
+      ? 'ช่วงที่เลือกมี ' + pt.total + ' เคส · สมเหตุผล ' + pt.rational + ' · ไม่สมเหตุผล ' + pt.irrational + ' · รอประเมิน ' + pt.pending
+      : 'ไม่มีเคสในช่วงเวลาที่เลือก') + '</div></div>';
+
+  if (!periodCases.length) {
+    html += '<div class="empty">ไม่มีเคสในช่วงเวลาที่เลือก</div>';
+  } else {
+    html += '<div class="reg-grid">' + periodCases.map(function (c) {
+      var st = statusOf(c);
+      return '<button class="chip ' + statusClass(st) + '" data-case="' + esc(c.no) + '" title="เคส ' + esc(c.no) + ' · ' + statusText(st) + '">' +
+        esc(c.no) + (st !== 'pending' ? '<span class="ck">✓</span>' : '') + '</button>';
+    }).join('') + '</div>';
+    html += '<p class="reg-hint">แตะที่หมายเลขเคสเพื่อดูบันทึกพยาบาล คำสั่งแพทย์ และผลการพิจารณาของอาจารย์แพทย์</p>';
+  }
+  html += '</div>';
+
+  /* --- KPI --- */
+  html += '<div class="kpis">' +
+    kpi('เคสทั้งหมด', t.total, 'ใบสั่งยาปฏิชีวนะ', '') +
+    kpi('สมเหตุผล', t.rational, 'อาจารย์แพทย์ยืนยัน', 'g') +
+    kpi('ไม่สมเหตุผล', t.irrational, 'อาจารย์แพทย์ยืนยัน', 'r') +
+    kpi('รอประเมิน', t.pending, 'ยังไม่ได้พิจารณา', '') +
+    kpi('ร้อยละสมเหตุผล', t.done ? fmtPct(pct(t.rational, t.done)) : '—', 'Rational prescribing rate', '') +
+    kpi('ประเมินแล้ว', t.done + '<small>/' + t.total + '</small>', 'ทุกเคสต้องผ่านการยืนยัน', '') +
+    '</div>';
+
+  /* --- ข้อบ่งชี้ + รายการยา --- */
+  var indCount = {}, drugCount = {};
+  S.cases.forEach(function (c) {
+    indicationsOf(c).forEach(function (i) { indCount[i] = (indCount[i] || 0) + 1; });
+    var d = drugKey(c.drug); drugCount[d] = (drugCount[d] || 0) + 1;
+  });
+
+  html += '<div class="cols2">' +
+    '<div class="card"><p class="eyebrow">ข้อมูลเหตุผลที่สั่งใช้ยา</p><h3>ข้อบ่งชี้ที่พบในเวชระเบียน</h3>' +
+    '<p class="sub">จัดกลุ่มจากบันทึกแพทย์ พยาบาล และข้อมูลหัตถการของแต่ละเคส</p>' +
+    propList(indCount, S.cases.length) + '</div>' +
+    '<div class="card"><p class="eyebrow">รายการยา</p><h3>ยาปฏิชีวนะที่ถูกสั่งใช้</h3>' +
+    '<p class="sub">นับจากข้อความคำสั่งยาในชีต</p>' +
+    propList(drugCount, S.cases.length) + '</div></div>';
+
+  /* --- สถิติรายบุคคล --- */
+  var byDoc = {};
+  S.cases.forEach(function (c) {
+    var n = String(c.doctor || '').trim() || '(ไม่ระบุ)';
+    if (!byDoc[n]) byDoc[n] = { total: 0, rational: 0, irrational: 0, pending: 0 };
+    var st = statusOf(c);
+    byDoc[n].total++;
+    if (st === 'rational') byDoc[n].rational++;
+    else if (st === 'irrational') byDoc[n].irrational++;
+    else byDoc[n].pending++;
+  });
+  var docs = Object.keys(byDoc).sort(function (a, b) { return byDoc[b].total - byDoc[a].total; });
+
+  html += '<div class="card" style="margin-top:18px"><div class="card-h"><div>' +
+    '<p class="eyebrow">สถิติรายบุคคล</p><h3>การสั่งใช้ยาแยกตามแพทย์ผู้สั่ง</h3>' +
+    '<p class="sub">' + (S.session
+      ? 'เปิดสวิตช์เพื่อแสดงชื่อแพทย์จริง'
+      : 'ชื่อแพทย์ถูกปิดไว้ เข้าสู่ระบบแล้วจึงเปิดแสดงได้') + '</p></div>' +
+    '<button class="sw' + (S.showDoctorNames ? ' on' : '') + '" data-act="toggleDoctors">' +
+    '<span class="sw-t"></span><span>แสดงชื่อแพทย์</span></button></div>';
+
+  if (!docs.length) {
+    html += '<div class="empty">ยังไม่มีข้อมูล</div>';
+  } else {
+    html += '<div class="tbl-wrap"><table class="tbl"><thead><tr>' +
+      '<th>แพทย์ผู้สั่ง</th><th>ใบสั่งยา</th><th>สมเหตุผล</th><th>ไม่สมเหตุผล</th><th>รอประเมิน</th><th>ร้อยละสมเหตุผล</th>' +
+      '</tr></thead><tbody>' +
+      docs.map(function (n) {
+        var d = byDoc[n], done = d.rational + d.irrational;
+        return '<tr><td>' + esc(doctorLabel(n)) + '</td><td>' + d.total + '</td><td>' + d.rational +
+          '</td><td>' + d.irrational + '</td><td>' + d.pending + '</td><td>' +
+          (done ? fmtPct(pct(d.rational, done)) : '—') + '</td></tr>';
+      }).join('') +
+      '<tr class="sum"><td>รวมทั้งหมด</td><td>' + t.total + '</td><td>' + t.rational + '</td><td>' +
+      t.irrational + '</td><td>' + t.pending + '</td><td>' +
+      (t.done ? fmtPct(pct(t.rational, t.done)) : '—') + '</td></tr>' +
+      '</tbody></table></div>';
+  }
+  html += '</div>';
+  return html;
+}
+
+function kpi(k, v, n, cls) {
+  return '<div class="kpi ' + cls + '"><div class="k">' + esc(k) + '</div><div class="v">' + v +
+    '</div><div class="n">' + esc(n) + '</div></div>';
+}
+
+function propList(map, total) {
+  var keys = Object.keys(map).sort(function (a, b) { return map[b] - map[a]; });
+  if (!keys.length || !total) return '<div class="empty">ยังไม่มีข้อมูล</div>';
+  return '<div class="plist">' + keys.map(function (k) {
+    var n = map[k], p = pct(n, total);
+    return '<div class="prow"><div class="t"><span>' + esc(k) + '</span><b>' + n + ' · ' + fmtPct(p) +
+      '</b></div><div class="ptrack"><i style="width:' + Math.max(1.5, p) + '%"></i></div></div>';
+  }).join('') + '</div>';
+}
+
+/* =========================================================== render: cases */
+
+function viewCases() {
+  if (S.loading) return errorBox() + '<div class="card"><div class="empty">กำลังโหลดข้อมูลจาก Google Sheets…</div></div>';
+
+  var html = errorBox();
+  var years = yearOptions(), months = monthOptions(S.f.year);
+
+  html += '<div class="filters">' +
+    '<div class="fld"><label>ค้นหา</label><input type="text" data-f="q" value="' + esc(S.f.q) + '"></div>' +
+    '<div class="fld"><label>เดือน / ปี</label><div class="my">' +
+      sel('month', S.f.month, [['', 'เดือน']].concat(months.map(function (m) { return [String(m), TH_MONTHS[m - 1]]; }))) +
+      sel('year', S.f.year, [['', 'ปี']].concat(years.map(function (y) { return [String(y), String(y)]; }))) +
+    '</div></div>' +
+    '<div class="fld"><label>แพทย์ผู้สั่ง</label>' +
+      sel('doctor', S.f.doctor, [['', 'ทั้งหมด']].concat(doctorOptions().map(function (d) { return [d, doctorLabel(d)]; }))) + '</div>' +
+    '<div class="fld"><label>ยา</label>' +
+      sel('drug', S.f.drug, [['', 'ทั้งหมด']].concat(drugOptions().map(function (d) { return [d, d]; }))) + '</div>' +
+    '<div class="fld"><label>ผลประเมิน</label>' +
+      sel('result', S.f.result, [['', 'ทั้งหมด'], ['rational', 'สมเหตุผล'], ['irrational', 'ไม่สมเหตุผล'], ['pending', 'รอประเมิน']]) + '</div>' +
+    '<div class="fld"><label>การยืนยัน</label>' +
+      sel('confirmed', S.f.confirmed, [['', 'ทั้งหมด'], ['yes', 'ยืนยันแล้ว'], ['no', 'ยังไม่ยืนยัน']]) + '</div>' +
+    '</div>';
+
+  var list = filteredCases();
+  html += '<div class="count">แสดง ' + list.length + ' จาก ' + S.cases.length + ' เคส</div>';
+
+  if (!list.length) {
+    html += '<div class="card"><div class="empty"><b style="display:block;font-size:16px;color:var(--ink)">' +
+      (S.cases.length ? 'ไม่พบเคสที่ตรงกับตัวกรอง' : 'ยังไม่มีข้อมูลเคส') + '</b>' +
+      (S.cases.length ? 'ลองล้างคำค้นหรือเลือกตัวกรองใหม่' : 'ตรวจสอบว่ามีแถวข้อมูลในแท็บ Cases ของ Google Sheets') +
+      '</div></div>';
+    return html;
+  }
+
+  html += list.map(caseRowHTML).join('');
+  return html;
+}
+
+function sel(name, value, opts) {
+  return '<select data-f="' + name + '">' + opts.map(function (o) {
+    return '<option value="' + esc(o[0]) + '"' + (String(value) === String(o[0]) ? ' selected' : '') + '>' +
+      esc(o[1]) + '</option>';
+  }).join('') + '</select>';
+}
+
+function caseRowHTML(c) {
+  var st = statusOf(c);
+  var d = caseDate(c);
+  var admit = d ? d.d + '/' + d.m + '/' + d.y : (c.admit || '—');
+  return '<article class="crow ' + statusClass(st) + '" data-row="' + esc(c.no) + '">' +
+    '<div class="crow-b" data-open="' + esc(c.no) + '">' +
+      '<div class="pt">' +
+        '<span class="nm">' + esc(c.patientName || '(ไม่ระบุชื่อ)') + '</span>' +
+        '<span class="tag">HN ' + esc(c.hn || '—') + '</span>' +
+        '<span class="tag">AN ' + esc(c.an || '—') + '</span>' +
+        '<span class="no">เคส ' + esc(c.no) + '</span>' +
+      '</div>' +
+      '<div class="meta">' +
+        '<span>ICD-10: ' + esc(c.icd10 || '—') + (c.icd10Other ? ', ' + esc(c.icd10Other) : '') + '</span>' +
+        '<span>GA: ' + esc(c.week || '—') + ' สัปดาห์</span>' +
+        '<span>รับเข้า: ' + esc(admit) + '</span>' +
+        '<span>แพทย์: ' + esc(doctorLabel(c.doctor)) + '</span>' +
+      '</div>' +
+      '<div class="drug">' + esc(c.drug || '—') + '</div>' +
+      '<div class="note"><span class="lb">DOCTOR ORDER</span><div class="clamp2">' + esc(c.doctorOrder || '—') + '</div></div>' +
+      '<div class="note"><span class="lb">NURSE NOTE</span><div class="clamp2">' + esc(c.nurseNote || '—') + '</div></div>' +
+    '</div>' +
+    '<div class="crow-cf" data-cf="' + esc(c.no) + '"></div>' +
+  '</article>';
+}
+
+/* --------------------------------------------------------- confirm block */
+
+function confirmViewHTML(c) {
+  var k = confOf(c);
+  if (!k) {
+    if (canConfirm()) {
+      return '<button class="cbox wait can" data-confirm-start="' + esc(c.no) + '">' +
+        '<span class="hd"><span>○ ยังไม่ยืนยัน</span><span>แตะเพื่อยืนยัน ›</span></span></button>';
+    }
+    return '<div class="cbox wait"><span class="hd"><span>○ ยังไม่ยืนยัน</span></span></div>';
+  }
+  var g = k.status === 'rational';
+  return '<div class="cbox ' + (g ? 'g' : 'r') + '">' +
+    '<div class="hd"><span>✓ ยืนยันโดยอาจารย์แพทย์: ' + (g ? 'สมเหตุผล' : 'ไม่สมเหตุผล') + '</span>' +
+    (canConfirm() ? '<button data-confirm-start="' + esc(c.no) + '" style="font-size:13px;color:inherit;text-decoration:underline">แก้ไข</button>' : '') +
+    '</div>' +
+    '<div class="who">' + esc(k.by_name || '—') + ' · ' + esc(fmtWhen(k.at)) + '</div>' +
+    '<div class="cm">' + esc(k.note || '') + '</div></div>';
+}
+
+function fmtWhen(iso) {
+  var s = String(iso || '');
+  var m = s.match(/^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})/);
+  if (!m) return s;
+  return (+m[3]) + ' ' + TH_MONTHS[(+m[2]) - 1] + ' ' + (+m[1] + 543) + ' เวลา ' + m[4] + ':' + m[5] + ' น.';
+}
+
+function confirmFormHTML(c) {
+  var k = confOf(c);
+  return '<div class="cform">' +
+    '<div class="row">' +
+      '<select data-cf-status>' +
+        '<option value="">— เลือกผลการประเมิน —</option>' +
+        '<option value="rational"' + (k && k.status === 'rational' ? ' selected' : '') + '>สมเหตุผล</option>' +
+        '<option value="irrational"' + (k && k.status === 'irrational' ? ' selected' : '') + '>ไม่สมเหตุผล</option>' +
+      '</select>' +
+      '<button class="cancel" data-cf-cancel>ยกเลิก</button>' +
+    '</div>' +
+    '<div data-cf-note-wrap class="row" style="margin-top:10px;' + (k ? '' : 'display:none') + '">' +
+      '<input type="text" data-cf-note placeholder="เหตุผลประกอบการยืนยัน (จำเป็น)" value="' + esc(k ? k.note : '') + '">' +
+      '<button class="go" data-cf-save>บันทึก</button>' +
+    '</div>' +
+    '<div class="err" data-cf-err></div></div>';
+}
+
+/** ผูกส่วนยืนยันเข้ากับ container (ใช้ได้ทั้งในแถวเคสและหน้ารายละเอียด) */
+function mountConfirm(container, c, onSaved) {
+  function paintView() {
+    container.innerHTML = confirmViewHTML(c);
+    var start = container.querySelector('[data-confirm-start]');
+    if (start) start.addEventListener('click', function (e) { e.stopPropagation(); paintForm(); });
+  }
+  function paintForm() {
+    container.innerHTML = confirmFormHTML(c);
+    var selEl = container.querySelector('[data-cf-status]');
+    var wrap = container.querySelector('[data-cf-note-wrap]');
+    var note = container.querySelector('[data-cf-note]');
+    var save = container.querySelector('[data-cf-save]');
+    var err = container.querySelector('[data-cf-err]');
+
+    container.addEventListener('click', function (e) { e.stopPropagation(); });
+    selEl.addEventListener('change', function () {
+      wrap.style.display = selEl.value ? '' : 'none';
+      if (selEl.value) note.focus();
+    });
+    container.querySelector('[data-cf-cancel]').addEventListener('click', paintView);
+    note.addEventListener('keydown', function (e) { if (e.key === 'Enter') doSave(); });
+    save.addEventListener('click', doSave);
+
+    function doSave() {
+      err.textContent = '';
+      if (!selEl.value) { err.textContent = 'กรุณาเลือกผลการประเมิน'; return; }
+      if (!note.value.trim()) { err.textContent = 'ต้องกรอกเหตุผลก่อนบันทึกผลการยืนยัน'; return; }
+      save.disabled = true;
+      api('confirm', { case_no: String(c.no), status: selEl.value, note: note.value.trim() })
+        .then(function (d) {
+          S.confirmations[String(c.no).trim()] = d.confirmation;
+          toast('บันทึกผลการยืนยันเรียบร้อย');
+          if (onSaved) onSaved();
+          else { paintView(); refreshRowStatus(c); renderTabs(); renderDrawer(); updateFooter(); }
+        })
+        .catch(function (e2) { err.textContent = e2.message; save.disabled = false; });
+    }
+  }
+  paintView();
+}
+
+function updateFooter() {
+  var f = document.querySelector('.foot');
+  if (f) f.outerHTML = viewFooter();
+}
+
+function refreshRowStatus(c) {
+  var row = document.querySelector('[data-row="' + cssEsc(String(c.no)) + '"]');
+  if (row) row.className = 'crow ' + statusClass(statusOf(c));
+}
+function cssEsc(s) { return String(s).replace(/["\\]/g, '\\$&'); }
+
+/* ========================================================== render: detail */
+
+function openDetail(no) {
+  S.detailNo = String(no);
+  paintDetail();
+  $('so').classList.add('on');
+  $('scrim').classList.add('on');
+}
+function closeDetail() {
+  S.detailNo = null;
+  $('so').classList.remove('on');
+  if (!$('drawer').classList.contains('on')) $('scrim').classList.remove('on');
+}
+
+function paintDetail() {
+  var c = S.cases.filter(function (x) { return String(x.no) === S.detailNo; })[0];
+  if (!c) { closeDetail(); return; }
+  $('soTitle').textContent = 'เคส ' + c.no;
+  var st = statusOf(c), k = confOf(c);
+  var d = caseDate(c);
+
+  var html = '';
+  if (k) {
+    html += '<div class="verdict ' + statusClass(st) + '">' +
+      '<div class="final">ผลสรุปโดยอาจารย์แพทย์ · ถือเป็นที่สุด</div>' +
+      '<div class="big">' + statusText(st) + '</div>' +
+      '<div style="font-size:12.5px;color:var(--muted);margin-top:4px">' +
+        esc(k.by_name || '—') + ' · ' + esc(fmtWhen(k.at)) + '</div>' +
+      '<div style="margin-top:8px;font-size:14px;line-height:1.6">' + esc(k.note || '') + '</div></div>';
+  } else {
+    html += '<div class="verdict p"><div class="final">สถานะ</div>' +
+      '<div class="big" style="color:var(--gray)">รอประเมิน</div>' +
+      '<div style="font-size:13px;color:var(--muted);margin-top:4px">ยังไม่มีการพิจารณาจากอาจารย์แพทย์</div></div>';
+  }
+
+  html += '<div class="card"><p class="eyebrow">ข้อมูลเคส</p><h3>' + esc(c.patientName || '(ไม่ระบุชื่อ)') + '</h3>' +
+    '<dl class="kv">' +
+      kv('HN / AN', esc(c.hn || '—') + ' / ' + esc(c.an || '—')) +
+      kv('ICD-10', esc(c.icd10 || '—') + (c.icd10Other ? ' , ' + esc(c.icd10Other) : '')) +
+      kv('ICD-9 (หัตถการ)', esc(c.icd9 || '—')) +
+      kv('อายุครรภ์', esc(c.week || '—') + ' สัปดาห์') +
+      kv('วันรับเข้า / จำหน่าย', esc(d ? d.d + '/' + d.m + '/' + d.y : (c.admit || '—')) + ' — ' + esc(c.disc || '—')) +
+      kv('แพทย์ผู้สั่ง', esc(doctorLabel(c.doctor))) +
+      kv('ยาที่สั่ง', '<span class="mono" style="font-weight:600">' + esc(c.drug || '—') + '</span>') +
+    '</dl>' +
+    '<div style="margin-top:16px"><p class="eyebrow">ธงหัตถการและภาวะร่วม</p><div class="flags">' +
+      FLAG_LABELS.map(function (f) {
+        var on, txt = f[1];
+        if (f[0] === 'tear') {
+          var tv = String(c.tear || '').trim();
+          on = tv && tv !== '0';
+          txt = on ? 'แผลฝีเย็บฉีกขาดระดับ ' + tv + ' (Perineal tear)' : 'แผลฝีเย็บฉีกขาด (Perineal tear)';
+        } else on = isOn(c[f[0]]);
+        return '<span class="flag' + (on ? ' on' : '') + '">' + (on ? '● ' : '○ ') + esc(txt) + '</span>';
+      }).join('') +
+    '</div></div></div>';
+
+  html += '<div class="card"><p class="eyebrow">บันทึก</p><h3 style="font-size:15px">Doctor order</h3>' +
+    '<div class="full" style="margin-top:8px">' + esc(c.doctorOrder || '—') + '</div></div>';
+  html += '<div class="card"><p class="eyebrow">บันทึก</p><h3 style="font-size:15px">Nurse note</h3>' +
+    '<div class="full" style="margin-top:8px">' + esc(c.nurseNote || '—') + '</div></div>';
+
+  html += '<div class="card"><p class="eyebrow">การยืนยันของอาจารย์แพทย์</p>' +
+    '<div id="detailConfirm" style="margin-top:12px"></div>' +
+    (k && canConfirm() ? '<button class="danger" data-act="unconfirm">ยกเลิกการยืนยันเคสนี้</button>' : '') +
+    (!S.session ? '<p class="sub" style="margin-top:10px">ต้องเข้าสู่ระบบด้วยบัญชีอาจารย์แพทย์จึงจะบันทึกผลได้</p>' : '') +
+    '</div>';
+
+  $('soBody').innerHTML = html;
+  $('soBody').scrollTop = 0;
+  mountConfirm($('detailConfirm'), c, function () {
+    paintDetail(); render();
+  });
+}
+
+function kv(k, v) { return '<dt>' + esc(k) + '</dt><dd>' + v + '</dd>'; }
+
+/* =========================================================== render: users */
+
+function viewUsers() {
+  if (!isAdmin()) return '<div class="card"><div class="empty">หน้านี้สำหรับผู้ดูแลระบบเท่านั้น</div></div>';
+  var pending = S.users.filter(function (u) { return u.status === 'pending'; });
+  var others = S.users.filter(function (u) { return u.status !== 'pending'; });
+
+  var html = '<div class="card"><p class="eyebrow">ผู้ดูแลระบบ</p><h3>คำขอที่รออนุมัติ</h3>';
+  if (!pending.length) html += '<div class="empty">ไม่มีคำขอค้างอยู่</div>';
+  else html += '<div style="margin-top:14px">' + pending.map(function (u) {
+    return '<div class="ureq"><b>' + esc(u.name) + '</b> <span class="mono" style="color:var(--muted)">@' +
+      esc(u.username) + '</span><div style="font-size:13px;color:var(--muted);margin-top:2px">ขอสิทธิ์: ' +
+      esc(roleTh(u.requested_role)) + ' · สมัครเมื่อ ' + esc(fmtWhen(u.created_at)) + '</div>' +
+      '<div class="r"><select data-role-for="' + esc(u.id) + '">' +
+        ['viewer', 'advisor', 'admin'].map(function (r) {
+          return '<option value="' + r + '"' + (u.requested_role === r ? ' selected' : '') + '>' + roleTh(r) + '</option>';
+        }).join('') +
+      '</select>' +
+      '<button class="btn-ok" data-approve="' + esc(u.id) + '">อนุมัติ</button>' +
+      '<button class="btn-no" data-reject="' + esc(u.id) + '">ไม่อนุมัติ</button></div></div>';
+  }).join('') + '</div>';
+  html += '</div>';
+
+  html += '<div class="card utbl"><p class="eyebrow">บัญชีผู้ใช้</p><h3>ผู้ใช้ทั้งหมด</h3><div class="tbl-wrap"><table class="tbl"><thead><tr>' +
+    '<th>ชื่อ</th><th style="text-align:left">ชื่อผู้ใช้</th><th style="text-align:left">บทบาท</th>' +
+    '<th style="text-align:left">สถานะ</th><th style="text-align:left">เข้าสู่ระบบได้</th></tr></thead><tbody>' +
+    others.map(function (u) {
+      return '<tr><td>' + esc(u.name) + '</td><td style="text-align:left">' + esc(u.username) + '</td>' +
+        '<td style="text-align:left"><select data-set-role="' + esc(u.id) + '">' +
+          ['viewer', 'advisor', 'admin'].map(function (r) {
+            return '<option value="' + r + '"' + (u.role === r ? ' selected' : '') + '>' + roleTh(r) + '</option>';
+          }).join('') + '</select></td>' +
+        '<td style="text-align:left"><span class="badge ' + (u.status === 'approved' ? 'ok' : u.status === 'rejected' ? 'no' : '') + '">' +
+          esc(statusTh(u.status)) + '</span></td>' +
+        '<td style="text-align:left"><button class="sw' + (u.active ? ' on' : '') + '" data-toggle-active="' +
+          esc(u.id) + '" data-now="' + (u.active ? '1' : '0') + '"><span class="sw-t"></span></button></td></tr>';
+    }).join('') + '</tbody></table></div></div>';
+  return html;
+}
+
+function roleTh(r) { return r === 'admin' ? 'ผู้ดูแลระบบ' : r === 'advisor' ? 'อาจารย์แพทย์' : 'ผู้ดูอย่างเดียว'; }
+function statusTh(s) { return s === 'approved' ? 'อนุมัติแล้ว' : s === 'rejected' ? 'ไม่อนุมัติ' : 'รออนุมัติ'; }
+
+function loadUsers() {
+  return api('listUsers', {}).then(function (d) {
+    S.users = d.users || [];
+    S.pendingRequests = S.users.filter(function (u) { return u.status === 'pending'; }).length;
+    render();
+  }).catch(function (e) { toast(e.message); });
+}
+
+/* =========================================================== render: modal */
+
+function openModal(html) {
+  $('mbox').innerHTML = html;
+  $('modal').classList.add('on');
+  var first = $('mbox').querySelector('input');
+  if (first) setTimeout(function () { first.focus(); }, 30);
+}
+function closeModal() { $('modal').classList.remove('on'); }
+
+function loginModal() {
+  openModal(
+    '<h2>เข้าสู่ระบบ</h2><p class="s">สำหรับอาจารย์แพทย์และผู้ดูแลระบบ</p>' +
+    '<div class="fld"><input type="text" id="lgU" placeholder="ชื่อผู้ใช้" autocomplete="username"></div>' +
+    '<div class="fld"><input type="password" id="lgP" placeholder="รหัสผ่าน" autocomplete="current-password"></div>' +
+    '<button class="go" data-act="doLogin">เข้าสู่ระบบ</button>' +
+    '<div class="err hide" id="lgErr"></div>' +
+    '<div class="alt">ยังไม่มีบัญชี? <button data-act="registerModal">สมัครใช้งาน</button></div>' +
+    '<div class="alt"><button data-act="closeModal" style="color:var(--muted);font-weight:400">ปิด</button></div>'
+  );
+}
+
+function registerModal() {
+  openModal(
+    '<h2>สมัครใช้งาน</h2><p class="s">ผู้ดูแลระบบจะตรวจสอบและอนุมัติก่อนจึงเข้าใช้งานได้</p>' +
+    '<div class="fld"><input type="text" id="rgU" placeholder="ชื่อผู้ใช้"></div>' +
+    '<div class="fld"><input type="text" id="rgN" placeholder="ชื่อ-สกุล"></div>' +
+    '<div class="fld"><select id="rgR"><option value="advisor">อาจารย์แพทย์ (ยืนยันผลได้)</option>' +
+    '<option value="viewer">ผู้ดูอย่างเดียว</option></select></div>' +
+    '<div class="fld"><input type="password" id="rgP" placeholder="รหัสผ่าน (อย่างน้อย 6 ตัวอักษร)"></div>' +
+    '<div class="fld"><input type="password" id="rgP2" placeholder="ยืนยันรหัสผ่าน"></div>' +
+    '<button class="go" data-act="doRegister">ส่งคำขอ</button>' +
+    '<div class="err hide" id="rgErr"></div><div class="ok hide" id="rgOk"></div>' +
+    '<div class="alt">มีบัญชีแล้ว? <button data-act="loginModal">เข้าสู่ระบบ</button></div>'
+  );
+}
+
+function doLogin() {
+  var u = $('lgU').value.trim(), p = $('lgP').value, err = $('lgErr');
+  err.classList.add('hide');
+  if (!u || !p) { err.textContent = 'กรุณากรอกชื่อผู้ใช้และรหัสผ่าน'; err.classList.remove('hide'); return; }
+  api('login', { username: u, password: p, token: '' }).then(function (d) {
+    saveSession({ token: d.token, user: d.user });
+    closeModal();
+    toast('เข้าสู่ระบบในชื่อ ' + (d.user.name || d.user.username));
+    if (d.user.role === 'admin') {
+      api('pendingCount', {}).then(function (r) {
+        S.pendingRequests = r.pendingRequests;
+        if (S.pendingRequests) toast('มีคำขอใช้งานรออนุมัติ ' + S.pendingRequests + ' รายการ');
+        render();
+      }).catch(function () {});
+    }
+    render();
+  }).catch(function (e) {
+    err.textContent = e.message; err.classList.remove('hide');
+  });
+}
+
+function doRegister() {
+  var err = $('rgErr'), ok = $('rgOk');
+  err.classList.add('hide'); ok.classList.add('hide');
+  var u = $('rgU').value.trim(), n = $('rgN').value.trim(),
+      r = $('rgR').value, p = $('rgP').value, p2 = $('rgP2').value;
+  if (!u || !n || !p) { err.textContent = 'กรุณากรอกข้อมูลให้ครบ'; err.classList.remove('hide'); return; }
+  if (p !== p2) { err.textContent = 'รหัสผ่านทั้งสองช่องไม่ตรงกัน'; err.classList.remove('hide'); return; }
+  if (p.length < 6) { err.textContent = 'รหัสผ่านต้องยาวอย่างน้อย 6 ตัวอักษร'; err.classList.remove('hide'); return; }
+  api('register', { username: u, name: n, requested_role: r, password: p, token: '' }).then(function () {
+    ok.textContent = 'ส่งคำขอเรียบร้อย บัญชีอยู่ในสถานะ "รออนุมัติ" — เข้าสู่ระบบได้เมื่อผู้ดูแลระบบอนุมัติแล้ว';
+    ok.classList.remove('hide');
+  }).catch(function (e) { err.textContent = e.message; err.classList.remove('hide'); });
+}
+
+/* ================================================================ wiring  */
+
+function afterRender() {
+  document.querySelectorAll('[data-cf]').forEach(function (el) {
+    var no = el.getAttribute('data-cf');
+    var c = S.cases.filter(function (x) { return String(x.no) === no; })[0];
+    if (c) mountConfirm(el, c);
+  });
+}
+
+function setPage(p) {
+  S.page = p;
+  closeDrawer();
+  render();
+  window.scrollTo({ top: 0 });
+  if (p === 'users' && isAdmin()) loadUsers();
+}
+
+function openDrawer() { $('drawer').classList.add('on'); $('scrim').classList.add('on'); }
+function closeDrawer() {
+  $('drawer').classList.remove('on');
+  if (!$('so').classList.contains('on')) $('scrim').classList.remove('on');
+}
+
+document.addEventListener('click', function (e) {
+  var t = e.target.closest('[data-page],[data-act],[data-case],[data-open],[data-approve],[data-reject],[data-toggle-active]');
+  if (!t) return;
+
+  if (t.hasAttribute('data-page')) { setPage(t.getAttribute('data-page')); return; }
+  if (t.hasAttribute('data-case')) { openDetail(t.getAttribute('data-case')); return; }
+  if (t.hasAttribute('data-open')) { openDetail(t.getAttribute('data-open')); return; }
+  if (t.hasAttribute('data-approve')) {
+    var idA = t.getAttribute('data-approve');
+    var roleSel = document.querySelector('[data-role-for="' + cssEsc(idA) + '"]');
+    api('approveUser', { id: idA, role: roleSel ? roleSel.value : 'viewer' })
+      .then(function () { toast('อนุมัติเรียบร้อย'); loadUsers(); })
+      .catch(function (err) { toast(err.message); });
+    return;
+  }
+  if (t.hasAttribute('data-reject')) {
+    api('rejectUser', { id: t.getAttribute('data-reject') })
+      .then(function () { toast('ปฏิเสธคำขอเรียบร้อย'); loadUsers(); })
+      .catch(function (err) { toast(err.message); });
+    return;
+  }
+  if (t.hasAttribute('data-toggle-active')) {
+    var idT = t.getAttribute('data-toggle-active');
+    var now = t.getAttribute('data-now') === '1';
+    api('setActive', { id: idT, active: now ? '0' : '1' })
+      .then(function (d) { toast(d.message || 'บันทึกแล้ว'); loadUsers(); })
+      .catch(function (err) { toast(err.message); });
+    return;
+  }
+
+  switch (t.getAttribute('data-act')) {
+    case 'login': loginModal(); break;
+    case 'loginModal': loginModal(); break;
+    case 'registerModal': registerModal(); break;
+    case 'doLogin': doLogin(); break;
+    case 'doRegister': doRegister(); break;
+    case 'closeModal': closeModal(); break;
+    case 'logout': logout(); break;
+    case 'toggleDoctors':
+      if (!S.session) { toast('เข้าสู่ระบบก่อนจึงจะแสดงชื่อแพทย์ได้'); loginModal(); break; }
+      S.showDoctorNames = !S.showDoctorNames;
+      render();
+      break;
+    case 'unconfirm':
+      if (!S.detailNo) break;
+      api('unconfirm', { case_no: S.detailNo }).then(function () {
+        delete S.confirmations[String(S.detailNo).trim()];
+        toast('ยกเลิกการยืนยันแล้ว');
+        paintDetail(); render();
+      }).catch(function (err) { toast(err.message); });
+      break;
+  }
+});
+
+document.addEventListener('change', function (e) {
+  var el = e.target;
+  if (el.hasAttribute && el.hasAttribute('data-f')) {
+    var key = el.getAttribute('data-f');
+    S.f[key] = el.value;
+    if (key === 'year') S.f.month = '';
+    render();
+  } else if (el.hasAttribute && el.hasAttribute('data-dash')) {
+    var dk = el.getAttribute('data-dash');
+    S.dash[dk] = el.value;
+    if (dk === 'year') S.dash.month = '';
+    render();
+  } else if (el.hasAttribute && el.hasAttribute('data-set-role')) {
+    api('setRole', { id: el.getAttribute('data-set-role'), role: el.value })
+      .then(function () { toast('เปลี่ยนบทบาทเรียบร้อย'); loadUsers(); })
+      .catch(function (err) { toast(err.message); loadUsers(); });
+  }
+});
+
+document.addEventListener('input', function (e) {
+  if (e.target.hasAttribute && e.target.hasAttribute('data-f') && e.target.tagName === 'INPUT') {
+    S.f[e.target.getAttribute('data-f')] = e.target.value;
+    clearTimeout(document._qt);
+    var pos = e.target.selectionStart;
+    document._qt = setTimeout(function () {
+      render();
+      var again = document.querySelector('input[data-f="q"]');
+      if (again) { again.focus(); try { again.setSelectionRange(pos, pos); } catch (x) {} }
+    }, 220);
+  }
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    if ($('modal').classList.contains('on')) closeModal();
+    else if ($('so').classList.contains('on')) closeDetail();
+    else closeDrawer();
+  }
+  if (e.key === 'Enter' && $('modal').classList.contains('on')) {
+    if ($('lgU')) doLogin();
+    else if ($('rgU')) doRegister();
+  }
+});
+
+$('burger').addEventListener('click', openDrawer);
+$('dwClose').addEventListener('click', closeDrawer);
+$('soClose').addEventListener('click', closeDetail);
+$('scrim').addEventListener('click', function () { closeDrawer(); closeDetail(); });
+$('modal').addEventListener('click', function (e) { if (e.target === $('modal')) closeModal(); });
+
+/* =================================================================== init */
+
+restoreSession().then(function () {
+  startPendingWatch();
+  return loadData();
+}).then(function () {
+  if (isAdmin()) {
+    api('pendingCount', {}).then(function (d) {
+      S.pendingRequests = d.pendingRequests;
+      if (S.pendingRequests) toast('มีคำขอใช้งานรออนุมัติ ' + S.pendingRequests + ' รายการ');
+      render();
+    }).catch(function () {});
+  }
+});
+
+</script>
+</body>
+</html>
