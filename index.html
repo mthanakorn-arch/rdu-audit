@@ -73,7 +73,7 @@ a{color:var(--red)}
 .dw-top h2{margin:0;font-family:var(--serif);font-size:15.5px;color:var(--red);font-weight:600}
 .dw-top p{margin:1px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
 .dw-x{margin-left:auto;font-size:19px;color:var(--muted);line-height:1;padding:2px 4px}
-.dw-body{flex:1;overflow:auto;padding:14px 0}
+.dw-body{flex:1;overflow:auto;padding:14px 0;display:flex;flex-direction:column;min-height:0}
 .dw-grp{padding:12px 18px 6px;font-size:11.5px;letter-spacing:.08em;color:var(--muted)}
 .dw-i{display:flex;align-items:center;gap:8px;padding:11px 18px;color:var(--red);font-size:14.5px;
   border-left:3px solid transparent;width:100%;text-align:left}
@@ -81,7 +81,9 @@ a{color:var(--red)}
 .dw-i.on{background:var(--red-l);border-left-color:var(--red);font-weight:600}
 .dw-i .pill{margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-family:var(--mono);
   border-radius:999px;padding:1px 7px}
-.dw-admin{margin-top:auto;border-top:1px solid var(--line);padding-top:8px}
+.dw-admin{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;flex:none}
+/* "จัดการผู้ใช้" อยู่ท้ายสุดของแถบเสมอ พร้อมเส้นคั่นแยกส่วนผู้ดูแลระบบ */
+.tabs-in .tab-end{border-left:1px solid var(--line);padding-left:26px;margin-left:4px}
 .dw-foot{border-top:1px solid var(--line);padding:14px 18px 16px}
 .dw-foot .u{font-size:14px;font-weight:600}
 .dw-foot .s{font-size:12.5px;color:var(--muted);margin-top:2px}
@@ -241,6 +243,10 @@ a{color:var(--red)}
 .flags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .flag{border:1px solid var(--line-2);border-radius:var(--r);padding:5px 10px;font-size:12.5px;color:var(--muted)}
 .flag.on{border-color:var(--red);background:var(--red-l);color:var(--red-d);font-weight:600}
+.grade{font-family:var(--mono);font-weight:700;background:var(--red);color:#fff;border-radius:2px;
+  padding:1px 7px;margin:0 3px;letter-spacing:.02em}
+.grade.na{background:var(--orange);color:#fff}
+.flag.on:has(.grade.na){border-color:var(--orange);background:#FDF4EC;color:#8E4A11}
 .full{white-space:pre-wrap;font-size:14px;line-height:1.6}
 .danger{border:1px solid var(--red);color:var(--red);border-radius:var(--r);padding:9px 16px;font-size:13.5px;margin-top:12px}
 .danger:hover{background:var(--red-l)}
@@ -358,13 +364,18 @@ var API = '/api/rdu';
 var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 var FLAG_LABELS = [
-  ['tubal',      'ทำหมันหลังคลอด (Tubal resection)'],
-  ['balloon',    'ใส่บอลลูนห้ามเลือด (Balloon tamponade)'],
+  ['tear',       'แผลฝีเย็บฉีกขาด (Perineal tear)'],
   ['hemorrhage', 'ตกเลือดหลังคลอด (Postpartum hemorrhage)'],
-  ['clot',       'ก้อนเลือดคั่ง / ล้วงรก (Blood clot)'],
+  ['balloon',    'ใส่บอลลูนห้ามเลือด (Balloon tamponade)'],
+  ['clot',       'ก้อนเลือดคั่ง / ล้วงรก'],
   ['syphilis',   'ซิฟิลิส (Syphilis)'],
-  ['tear',       'แผลฝีเย็บฉีกขาด (Perineal tear)']
+  ['tubal',      'ทำหมันหลังคลอด (Postpartum Sterilization)']
 ];
+/** ค่าที่ถือว่า "ไม่ระบุระดับ" ในคอลัมน์ tear */
+function isNA(v) {
+  var s = String(v || '').trim().toLowerCase();
+  return s === 'n/a' || s === 'na' || s === '-' || s === 'ไม่ระบุ';
+}
 
 var S = {
   loading: true,
@@ -430,11 +441,15 @@ function drugKey(text) {
 function indicationsOf(c) {
   var out = [];
   var tear = String(c.tear || '').trim();
-  if (tear && tear !== '0') out.push('แผลฝีเย็บฉีกขาดระดับ ' + tear + ' (Perineal tear grade ' + tear + ')');
-  if (isOn(c.tubal)) out.push('ทำหมันหลังคลอด (Tubal resection)');
+  if (tear && tear !== '0') {
+    out.push(isNA(tear)
+      ? 'แผลฝีเย็บฉีกขาด ไม่ระบุระดับ (Perineal tear, grade N/A)'
+      : 'แผลฝีเย็บฉีกขาดระดับ ' + tear + ' (Perineal tear grade ' + tear + ')');
+  }
+  if (isOn(c.tubal)) out.push('ทำหมันหลังคลอด (Postpartum Sterilization)');
   if (isOn(c.balloon)) out.push('ใส่บอลลูนห้ามเลือด (Balloon tamponade)');
   if (isOn(c.hemorrhage)) out.push('ตกเลือดหลังคลอด (Postpartum hemorrhage)');
-  if (isOn(c.clot)) out.push('ก้อนเลือดคั่ง / ล้วงรก (Blood clot)');
+  if (isOn(c.clot)) out.push('ก้อนเลือดคั่ง / ล้วงรก');
   if (isOn(c.syphilis)) out.push('ซิฟิลิส (Syphilis)');
   if (!out.length) out.push('ไม่พบข้อบ่งชี้ที่บันทึกไว้ในเวชระเบียน');
   return out;
@@ -666,31 +681,50 @@ function renderHeaderAuth() {
   }
 }
 
-function renderTabs() {
+/**
+ * เมนูทั้งระบบอยู่ที่เดียว ใช้ร่วมกันทั้งแถบบนและแถบข้าง
+ * เพิ่มเมนูใหม่ให้ push เข้า items ตรงจุดที่ระบุ — รายการที่ pinEnd: true
+ * (เช่น "จัดการผู้ใช้") จะถูกดันไปท้ายสุดเสมอ ไม่ว่าจะเพิ่มเมนูใหม่กี่รายการ
+ */
+function navItems() {
   var pending = S.cases.filter(function (c) { return statusOf(c) === 'pending'; }).length;
   var items = [
-    ['dashboard', 'แดชบอร์ด', 0],
-    ['cases', 'เคสทั้งหมด', pending]
+    { id: 'dashboard', label: 'แดชบอร์ด',  group: 'ภาพรวม',   badge: 0 },
+    { id: 'cases',     label: 'เคสทั้งหมด', group: 'ข้อมูลเคส', badge: pending }
+    /* ── เพิ่มเมนูใหม่ตรงนี้ ── */
   ];
-  if (isAdmin()) items.push(['users', 'จัดการผู้ใช้', S.pendingRequests]);
-  $('tabs').innerHTML = items.map(function (it) {
-    return '<button class="tab' + (S.page === it[0] ? ' on' : '') + '" data-page="' + it[0] + '">' +
-      esc(it[1]) + (it[2] ? '<span class="pill">' + it[2] + '</span>' : '') + '</button>';
+  if (isAdmin()) {
+    items.push({ id: 'users', label: 'จัดการผู้ใช้', group: 'ผู้ดูแลระบบ',
+                 badge: S.pendingRequests, pinEnd: true });
+  }
+  // Array.prototype.sort เป็น stable sort — ลำดับเดิมของรายการที่ไม่ pin จึงไม่เปลี่ยน
+  return items.sort(function (a, b) { return (a.pinEnd ? 1 : 0) - (b.pinEnd ? 1 : 0); });
+}
+
+function renderTabs() {
+  $('tabs').innerHTML = navItems().map(function (it) {
+    return '<button class="tab' + (S.page === it.id ? ' on' : '') +
+      (it.pinEnd ? ' tab-end' : '') + '" data-page="' + it.id + '">' +
+      esc(it.label) + (it.badge ? '<span class="pill">' + it.badge + '</span>' : '') + '</button>';
   }).join('');
 }
 
 function renderDrawer() {
-  var pending = S.cases.filter(function (c) { return statusOf(c) === 'pending'; }).length;
-  var html = '<div class="dw-grp">ภาพรวม</div>' +
-    '<button class="dw-i' + (S.page === 'dashboard' ? ' on' : '') + '" data-page="dashboard">แดชบอร์ด</button>' +
-    '<div class="dw-grp">ข้อมูลเคส</div>' +
-    '<button class="dw-i' + (S.page === 'cases' ? ' on' : '') + '" data-page="cases">เคสทั้งหมด' +
-      (pending ? '<span class="pill">' + pending + '</span>' : '') + '</button>';
-  if (isAdmin()) {
-    html += '<div class="dw-admin"><div class="dw-grp">ผู้ดูแลระบบ</div>' +
-      '<button class="dw-i' + (S.page === 'users' ? ' on' : '') + '" data-page="users">จัดการผู้ใช้' +
-      (S.pendingRequests ? '<span class="pill">' + S.pendingRequests + '</span>' : '') + '</button></div>';
+  var items = navItems();
+
+  function block(list) {
+    var out = '', lastGroup = null;
+    list.forEach(function (it) {
+      if (it.group !== lastGroup) { out += '<div class="dw-grp">' + esc(it.group) + '</div>'; lastGroup = it.group; }
+      out += '<button class="dw-i' + (S.page === it.id ? ' on' : '') + '" data-page="' + it.id + '">' +
+        esc(it.label) + (it.badge ? '<span class="pill">' + it.badge + '</span>' : '') + '</button>';
+    });
+    return out;
   }
+
+  var pinned = items.filter(function (it) { return it.pinEnd; });
+  var html = block(items.filter(function (it) { return !it.pinEnd; }));
+  if (pinned.length) html += '<div class="dw-admin">' + block(pinned) + '</div>';
   $('dwBody').innerHTML = html;
 
   var t = tally(S.cases);
@@ -939,6 +973,7 @@ function caseRowHTML(c) {
       '</div>' +
       '<div class="meta">' +
         '<span>ICD-10: ' + esc(c.icd10 || '—') + (c.icd10Other ? ', ' + esc(c.icd10Other) : '') + '</span>' +
+        '<span>ICD-9: ' + esc(c.icd9 || '—') + '</span>' +
         '<span>GA: ' + esc(c.week || '—') + ' สัปดาห์</span>' +
         '<span>รับเข้า: ' + esc(admit) + '</span>' +
         '<span>แพทย์: ' + esc(doctorLabel(c.doctor)) + '</span>' +
@@ -958,7 +993,7 @@ function confirmViewHTML(c) {
   if (!k) {
     if (canConfirm()) {
       return '<button class="cbox wait can" data-confirm-start="' + esc(c.no) + '">' +
-        '<span class="hd"><span>○ ยังไม่ยืนยัน</span><span>แตะเพื่อยืนยัน ›</span></span></button>';
+        '<span class="hd"><span>○ ยังไม่ยืนยัน</span><span>คลิกเพื่อยืนยัน ›</span></span></button>';
     }
     return '<div class="cbox wait"><span class="hd"><span>○ ยังไม่ยืนยัน</span></span></div>';
   }
@@ -1094,15 +1129,24 @@ function paintDetail() {
       kv('แพทย์ผู้สั่ง', esc(doctorLabel(c.doctor))) +
       kv('ยาที่สั่ง', '<span class="mono" style="font-weight:600">' + esc(c.drug || '—') + '</span>') +
     '</dl>' +
-    '<div style="margin-top:16px"><p class="eyebrow">ธงหัตถการและภาวะร่วม</p><div class="flags">' +
+    '<div style="margin-top:16px"><p class="eyebrow">หัตถการและภาวะร่วม</p><div class="flags">' +
       FLAG_LABELS.map(function (f) {
-        var on, txt = f[1];
+        var on, html2;
         if (f[0] === 'tear') {
           var tv = String(c.tear || '').trim();
           on = tv && tv !== '0';
-          txt = on ? 'แผลฝีเย็บฉีกขาดระดับ ' + tv + ' (Perineal tear)' : 'แผลฝีเย็บฉีกขาด (Perineal tear)';
-        } else on = isOn(c[f[0]]);
-        return '<span class="flag' + (on ? ' on' : '') + '">' + (on ? '● ' : '○ ') + esc(txt) + '</span>';
+          if (!on) {
+            html2 = esc('แผลฝีเย็บฉีกขาด (Perineal tear)');
+          } else {
+            html2 = esc('แผลฝีเย็บฉีกขาดระดับ ') +
+              '<b class="grade' + (isNA(tv) ? ' na' : '') + '">' + esc(isNA(tv) ? 'N/A' : tv) + '</b>' +
+              esc(' (Perineal tear)');
+          }
+        } else {
+          on = isOn(c[f[0]]);
+          html2 = esc(f[1]);
+        }
+        return '<span class="flag' + (on ? ' on' : '') + '">' + (on ? '● ' : '○ ') + html2 + '</span>';
       }).join('') +
     '</div></div></div>';
 
