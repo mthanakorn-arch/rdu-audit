@@ -184,6 +184,32 @@ a{color:var(--red)}
 .crow{background:#fff;border:1px solid var(--line);border-left:4px solid var(--gray);
   border-radius:var(--r);margin-bottom:12px}
 .crow.g{border-left-color:var(--green)} .crow.r{border-left-color:var(--red)}
+
+/* จุดสี AI บนแถวเคส — คนละจุดกับขอบซ้าย (ขอบซ้าย = ผลของอาจารย์แพทย์เท่านั้น) */
+.aidot{display:inline-flex;align-items:center;gap:5px;font-size:11.5px;white-space:nowrap;
+  border:1px solid var(--line-2);border-radius:2px;padding:1px 7px;color:var(--muted);margin-left:9px}
+.aidot i{width:8px;height:8px;border-radius:50%;background:var(--gray);display:block;flex:none}
+.aidot.g{border-color:var(--green);color:var(--green)}  .aidot.g i{background:var(--green)}
+.aidot.r{border-color:var(--red);color:var(--red)}      .aidot.r i{background:var(--red)}
+.aidot.busy{border-color:var(--orange);color:#8E4A11}   .aidot.busy i{background:var(--orange);animation:aipulse 1s ease-in-out infinite}
+@keyframes aipulse{0%,100%{opacity:1}50%{opacity:.2}}
+
+/* แถบสถานะ AI เหนือรายการเคส */
+.aibar{background:#fff;border:1px solid var(--line);border-radius:var(--r);padding:12px 16px;margin-bottom:12px;font-size:13.5px}
+.aibar .top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.aibar .top .ttl{font-weight:600}
+.aibar .top .sp{margin-left:auto;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.aibar button{border:1px solid var(--line-2);border-radius:var(--r);padding:5px 12px;font-size:13px;color:var(--muted)}
+.aibar button:hover{border-color:var(--red);color:var(--red)}
+.aibar .track{height:4px;background:var(--line);border-radius:2px;margin-top:10px;overflow:hidden}
+.aibar .track i{display:block;height:100%;width:0;background:var(--green);transition:width .3s}
+.aibar .lg{margin-top:9px;font-size:12px;color:var(--muted);display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+.aibar .lg span{display:inline-flex;align-items:center;gap:5px}
+.aibar .lg i{width:8px;height:8px;border-radius:50%;display:block;flex:none}
+.aibar .msg{margin-top:9px;font-size:12.5px;border-radius:var(--r);padding:8px 11px}
+.aibar .msg.warn{color:#8E4A11;background:#FDF4EC;border:1px solid var(--orange)}
+.aibar .msg.err{color:var(--red-d);background:var(--red-l);border:1px solid var(--red)}
+.ainote{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.55}
 .crow-b{padding:15px 18px}
 .crow-b:hover{background:#FEFCFC}
 .pt{display:flex;align-items:center;gap:9px;flex-wrap:wrap;padding-bottom:9px;
@@ -378,7 +404,22 @@ var S = {
   users: [],
   detailNo: null,
   dash: { year: '', month: '' },
-  f: { q: '', month: '', year: '', doctor: '', drug: '', result: '', confirmed: '' }
+  f: { q: '', month: '', year: '', doctor: '', drug: '', result: '', confirmed: '' },
+  /* ผู้ช่วยอ่าน guideline (AI) — แยกขาดจากสถานะเคส ไม่มีผลต่อ statusOf() */
+  ai: {
+    by: {},            // case_no -> {opinion, confidence, summary, model, at, by}
+    health: 'unknown', // unknown | ok | down
+    healthMsg: '',
+    store: 'none',     // sheet | local | none
+    storeMsg: '',
+    running: false,
+    stopped: false,
+    busyNo: null,
+    done: 0,
+    total: 0,
+    fail: 0,
+    lastErr: ''
+  }
 };
 
 /* ================================================================ helpers */
@@ -511,6 +552,7 @@ function loadData() {
     rebuildDoctorMap();                 // ดัชนีตัวกรองสร้างหลังโหลดข้อมูลเสมอ
     S.loading = false;
     render();
+    aiInit();                           // โหลดผล AI ที่เคยบันทึกไว้ แล้วไล่ประเมินเคสที่ยังไม่มีผล
   }).catch(function (err) {
     S.loading = false;
     S.error = err.message || String(err);
@@ -887,6 +929,8 @@ function viewCases() {
   var html = errorBox();
   var years = yearOptions(), months = monthOptions(S.f.year);
 
+  html += '<div id="aiBar">' + aiBarHTML() + '</div>';
+
   html += '<div class="filters">' +
     '<div class="fld"><label>ค้นหา</label><input type="text" data-f="q" value="' + esc(S.f.q) + '"></div>' +
     '<div class="fld"><label>เดือน / ปี</label><div class="my">' +
@@ -936,6 +980,7 @@ function caseRowHTML(c) {
         '<span class="tag">HN ' + esc(c.hn || '—') + '</span>' +
         '<span class="tag">AN ' + esc(c.an || '—') + '</span>' +
         '<span class="no">เคส ' + esc(c.no) + '</span>' +
+        aiDotHTML(c) +
       '</div>' +
       '<div class="meta">' +
         '<span>ICD-10: ' + esc(c.icd10 || '—') + (c.icd10Other ? ', ' + esc(c.icd10Other) : '') + '</span>' +
@@ -1111,6 +1156,10 @@ function paintDetail() {
   html += '<div class="card"><p class="eyebrow">บันทึก</p><h3 style="font-size:15px">Nurse note</h3>' +
     '<div class="full" style="margin-top:8px">' + esc(c.nurseNote || '—') + '</div></div>';
 
+  html += '<div class="card"><p class="eyebrow">ผู้ช่วยอ่าน guideline · ข้อเสนอแนะจาก AI ไม่ใช่ผลประเมิน</p>' +
+    aiDetailSummaryHTML(c) +
+    '<div id="aiPanel"></div></div>';
+
   html += '<div class="card"><p class="eyebrow">การยืนยันของอาจารย์แพทย์</p>' +
     '<div id="detailConfirm" style="margin-top:12px"></div>' +
     (k && canConfirm() ? '<button class="danger" data-act="unconfirm">ยกเลิกการยืนยันเคสนี้</button>' : '') +
@@ -1119,6 +1168,26 @@ function paintDetail() {
 
   $('soBody').innerHTML = html;
   $('soBody').scrollTop = 0;
+
+  /* แผง AI ในหน้ารายละเอียด — ส่งเฉพาะข้อมูลทางคลินิก ไม่ส่ง HN / AN / ชื่อผู้ป่วย / ชื่อแพทย์ */
+  if (window.RDUAI && $('aiPanel')) {
+    RDUAI.mount($('aiPanel'), function () { return aiPayload(c); }, function (res) {
+      /* อ่านซ้ำจากหน้ารายละเอียด ให้บันทึกทับผลเดิมและอัปเดตจุดสีในรายการด้วย */
+      var reasons = res.reasons || [];
+      aiPersist(aiKey(c), {
+        case_no: aiKey(c),
+        opinion: AI_LABEL[res.opinion] ? res.opinion : 'insufficient_data',
+        confidence: res.confidence || '',
+        summary: res.summary || '',
+        model: res.model || '',
+        unverified: reasons.some(function (r) { return r && r.verified === false; }),
+        at: new Date().toISOString()
+      });
+      aiPaintDot(aiKey(c));
+      aiPaintBar();
+    });
+  }
+
   mountConfirm($('detailConfirm'), c, function () {
     paintDetail(); render();
   });
@@ -1277,6 +1346,290 @@ function doRegister() {
   }).catch(function (e) { err.textContent = e.message; err.classList.remove('hide'); });
 }
 
+/* ===================================================== AI: ผู้ช่วยอ่าน guideline */
+/*
+ * กฎที่ยึดไว้ ห้ามแก้โดยไม่ตั้งใจ
+ *  1) AI ไม่เปลี่ยนสถานะเคส  statusOf() ยังอ่านจาก S.confirmations อย่างเดียว
+ *  2) ขอบซ้ายของแถว = ผลที่อาจารย์แพทย์ยืนยัน   จุดสี AI = คนละจุด มีคำว่า "AI" กำกับเสมอ
+ *  3) เขียวคือ AI เห็นว่าสอดคล้อง guideline  แดงคืออาจไม่สอดคล้อง  เทาคือยังไม่มีผล/ข้อมูลไม่พอ
+ */
+
+var AI_LABEL = {
+  appropriate:       { cls: 'g', text: 'AI: สมเหตุผล' },
+  not_appropriate:   { cls: 'r', text: 'AI: ไม่สมเหตุผล' },
+  insufficient_data: { cls: '',  text: 'AI: ข้อมูลไม่พอสรุป' }
+};
+var AI_CONF = { high: 'ความมั่นใจสูง', medium: 'ความมั่นใจปานกลาง', low: 'ความมั่นใจต่ำ' };
+var AI_LS_KEY = 'rdu_ai_v1';
+
+function aiKey(c) { return String((c && c.no !== undefined ? c.no : c) || '').trim(); }
+function aiOf(c) { return S.ai.by[aiKey(c)] || null; }
+
+function aiTitleOf(a, busy) {
+  if (busy) return 'AI กำลังอ่าน guideline ให้เคสนี้';
+  if (!a) return 'AI ยังไม่ได้ประเมินเคสนี้ — ผลจริงต้องรออาจารย์แพทย์ยืนยัน';
+  var t = (AI_LABEL[a.opinion] || AI_LABEL.insufficient_data).text;
+  if (a.summary) t += ' — ' + a.summary;
+  if (AI_CONF[a.confidence]) t += ' (' + AI_CONF[a.confidence] + ')';
+  if (a.unverified) t += ' ⚠ มีข้ออ้างอิงที่ตรวจไม่พบใน guideline';
+  return t + ' · ข้อเสนอแนะจาก AI ไม่ใช่ผลประเมิน';
+}
+
+function aiDotHTML(c) {
+  var no = aiKey(c), busy = S.ai.busyNo === no, a = aiOf(c);
+  var cls, text;
+  if (busy) { cls = 'busy'; text = 'AI: กำลังอ่าน…'; }
+  else if (a && AI_LABEL[a.opinion]) {
+    cls = AI_LABEL[a.opinion].cls;
+    text = AI_LABEL[a.opinion].text + (a.unverified ? ' ⚠' : '');
+  } else { cls = ''; text = 'AI: รอยืนยัน'; }
+  return '<span class="aidot ' + cls + '" data-aidot="' + esc(no) + '" title="' + esc(aiTitleOf(a, busy)) +
+    '"><i></i>' + esc(text) + '</span>';
+}
+
+/* อัปเดตเฉพาะจุดเดียว ไม่ re-render ทั้งหน้า จะได้ไม่กระตุกและไม่เด้ง scroll */
+function aiPaintDot(no) {
+  var c = S.cases.filter(function (x) { return aiKey(x) === String(no); })[0];
+  if (!c) return;
+  document.querySelectorAll('[data-aidot="' + cssEsc(String(no)) + '"]').forEach(function (el) {
+    var tmp = document.createElement('div');
+    tmp.innerHTML = aiDotHTML(c);
+    el.replaceWith(tmp.firstChild);
+  });
+}
+
+/* ------------------------------------------------------------ เก็บผล AI */
+/* ลำดับ: Google Sheets (ผ่าน action aiList/aiSave) → ถ้า Code.gs ยังไม่มี action นี้ ใช้ localStorage ไปก่อน */
+
+function aiReadLocal() {
+  try { return JSON.parse(localStorage.getItem(AI_LS_KEY) || '{}') || {}; } catch (e) { return {}; }
+}
+function aiWriteLocal(map) {
+  try { localStorage.setItem(AI_LS_KEY, JSON.stringify(map)); } catch (e) {}
+}
+
+function aiLoadStored() {
+  return api('aiList', { token: '' }).then(function (d) {
+    S.ai.store = 'sheet'; S.ai.storeMsg = '';
+    S.ai.by = {};
+    (d.assessments || []).forEach(function (r) {
+      var k = String(r.case_no || '').trim();
+      if (k) S.ai.by[k] = r;
+    });
+  }).catch(function (e) {
+    S.ai.store = 'local';
+    S.ai.storeMsg = 'ยังบันทึกลง Google Sheets ไม่ได้ (' + (e.message || e) +
+      ') — ตอนนี้เก็บผลไว้ในเบราว์เซอร์เครื่องนี้ก่อน เพิ่ม action aiList/aiSave ใน Code.gs แล้วผลจะไปอยู่บนชีตให้ทุกคนเห็นตรงกัน';
+    S.ai.by = aiReadLocal();
+  });
+}
+
+function aiPersist(no, rec) {
+  var k = String(no).trim();
+  S.ai.by[k] = rec;
+  var local = aiReadLocal(); local[k] = rec; aiWriteLocal(local);   // เก็บสำเนาไว้เสมอ
+  if (S.ai.store !== 'sheet' || !S.session) return Promise.resolve();
+  return api('aiSave', {
+    case_no: k, opinion: rec.opinion, confidence: rec.confidence || '',
+    summary: rec.summary || '', model: rec.model || '', unverified: rec.unverified ? 1 : 0
+  }).catch(function (e) {
+    S.ai.storeMsg = 'บันทึกผล AI ลงชีตไม่สำเร็จ: ' + (e.message || e) + ' — ผลยังอยู่ในเบราว์เซอร์เครื่องนี้';
+    aiPaintBar();
+  });
+}
+
+/* ------------------------------------------------------- เรียกใช้บริการ AI */
+
+function aiPayload(c) {
+  /* ส่งเฉพาะข้อมูลทางคลินิก ไม่ส่ง HN / AN / ชื่อผู้ป่วย / ชื่อแพทย์ */
+  return {
+    'การวินิจฉัย': [c.icd10, c.icd10Other].filter(Boolean).join(', '),
+    'หัตถการ (ICD-9)': c.icd9,
+    'อายุครรภ์ (สัปดาห์)': c.week,
+    'ข้อบ่งชี้ที่พบในเวชระเบียน': indicationsOf(c),
+    'คำสั่งยา': c.drug,
+    'Doctor order': c.doctorOrder,
+    'Nurse note': c.nurseNote
+  };
+}
+
+function aiCheckHealth() {
+  if (!window.RDUAI) {
+    S.ai.health = 'down';
+    S.ai.healthMsg = 'ยังไม่ได้โหลดส่วนเชื่อมต่อ AI (rdu-ai-panel)';
+    return Promise.resolve(false);
+  }
+  return RDUAI.health().then(function (h) {
+    if (h && h.ok) { S.ai.health = 'ok'; S.ai.healthMsg = ''; return true; }
+    S.ai.health = 'down';
+    S.ai.healthMsg = (h && h.index && !h.index.ready)
+      ? 'บริการ AI ทำงานอยู่ แต่ยังไม่ได้สร้างดัชนี guideline — สั่ง reindex ก่อน'
+      : 'บริการ AI ตอบว่ายังไม่พร้อมใช้งาน';
+    return false;
+  }).catch(function (e) {
+    S.ai.health = 'down';
+    S.ai.healthMsg = 'ต่อกับบริการ AI ไม่ได้ (' + (e.message || e) + ') — ตรวจว่า ollama serve และ uvicorn ทำงานอยู่';
+    return false;
+  });
+}
+
+function aiPending() {
+  return S.cases.filter(function (c) { return !aiOf(c); });
+}
+
+function aiStart(force) {
+  if (S.ai.running || S.ai.health !== 'ok') return;
+  if (!S.session) return;                       // ต้องล็อกอินก่อนจึงสั่งให้ AI ทำงานได้
+  var todo = force ? S.cases.slice() : aiPending();
+  if (!todo.length) { aiPaintBar(); return; }
+  S.ai.running = true; S.ai.stopped = false;
+  S.ai.done = 0; S.ai.fail = 0; S.ai.total = todo.length; S.ai.lastErr = '';
+  aiPaintBar();
+  aiRunNext(todo, 0);
+}
+
+function aiStop() {
+  S.ai.stopped = true;
+  aiPaintBar();
+}
+
+function aiRunNext(todo, i) {
+  if (S.ai.stopped || i >= todo.length) {
+    S.ai.running = false; S.ai.busyNo = null;
+    aiPaintBar();
+    return;
+  }
+  var c = todo[i], no = aiKey(c);
+  S.ai.busyNo = no;
+  aiPaintDot(no); aiPaintBar();
+
+  RDUAI.assess(aiPayload(c)).then(function (res) {
+    var reasons = res.reasons || [];
+    var unverified = reasons.some(function (r) { return r && r.verified === false; });
+    var rec = {
+      case_no: no,
+      opinion: AI_LABEL[res.opinion] ? res.opinion : 'insufficient_data',
+      confidence: res.confidence || '',
+      summary: res.summary || '',
+      model: res.model || '',
+      unverified: unverified,
+      at: new Date().toISOString()
+    };
+    S.ai.done++;
+    return aiPersist(no, rec);
+  }).catch(function (e) {
+    S.ai.fail++;
+    S.ai.lastErr = e.message || String(e);
+  }).then(function () {
+    S.ai.busyNo = null;
+    aiPaintDot(no);
+    aiPaintBar();
+    if (S.detailNo === no) paintDetail();
+    setTimeout(function () { aiRunNext(todo, i + 1); }, 150);
+  });
+}
+
+/* --------------------------------------------------------- แถบสถานะบนหน้าเคส */
+
+function aiCounts() {
+  var n = { g: 0, r: 0, x: 0, none: 0 };
+  S.cases.forEach(function (c) {
+    var a = aiOf(c);
+    if (!a) n.none++;
+    else if (a.opinion === 'appropriate') n.g++;
+    else if (a.opinion === 'not_appropriate') n.r++;
+    else n.x++;
+  });
+  return n;
+}
+
+function aiBarHTML() {
+  var n = aiCounts(), left = aiPending().length;
+  var head, sp = '';
+
+  if (S.ai.health === 'unknown') {
+    head = '<span class="ttl">ผู้ช่วยอ่าน guideline</span><span style="color:var(--muted)">กำลังตรวจสอบบริการ AI…</span>';
+  } else if (S.ai.health !== 'ok') {
+    head = '<span class="ttl">ผู้ช่วยอ่าน guideline</span><span style="color:var(--muted)">ปิดใช้งานอยู่</span>';
+  } else if (S.ai.running) {
+    head = '<span class="ttl">AI กำลังอ่าน guideline</span>' +
+      '<span style="color:var(--muted)">' + S.ai.done + ' / ' + S.ai.total + ' เคส' +
+      (S.ai.fail ? ' · ไม่สำเร็จ ' + S.ai.fail : '') + '</span>';
+    sp = '<button data-act="aiStop">หยุด</button>';
+  } else {
+    head = '<span class="ttl">ผู้ช่วยอ่าน guideline</span>' +
+      '<span style="color:var(--muted)">AI ประเมินแล้ว ' + (S.cases.length - left) + ' จาก ' + S.cases.length + ' เคส</span>';
+    if (S.session) {
+      sp = (left ? '<button data-act="aiStart">ให้ AI ประเมินอีก ' + left + ' เคส</button>' : '') +
+           '<button data-act="aiRedo">ประเมินใหม่ทั้งหมด</button>';
+    }
+  }
+
+  var pctDone = S.ai.total ? Math.round((S.ai.done + S.ai.fail) / S.ai.total * 100) : 0;
+
+  var html = '<div class="aibar"><div class="top">' + head + '<span class="sp">' + sp + '</span></div>';
+  if (S.ai.running) html += '<div class="track"><i style="width:' + pctDone + '%"></i></div>';
+
+  html += '<div class="lg">' +
+    '<span><i style="background:var(--green)"></i>AI: สมเหตุผล ' + n.g + '</span>' +
+    '<span><i style="background:var(--red)"></i>AI: ไม่สมเหตุผล ' + n.r + '</span>' +
+    '<span><i style="background:var(--gray)"></i>รอยืนยัน ' + (n.none + n.x) + '</span>' +
+    '</div>';
+
+  html += '<div class="ainote">จุดสีนี้เป็นข้อเสนอแนะจาก AI ไม่ใช่ผลประเมิน ' +
+    'ผลที่ถือเป็นที่สุดคือแถบสีที่ขอบซ้ายของแถว ซึ่งเปลี่ยนได้เมื่ออาจารย์แพทย์ยืนยันพร้อมเหตุผลเท่านั้น</div>';
+
+  if (S.ai.health === 'ok' && !S.session) {
+    html += '<div class="msg warn">เข้าสู่ระบบก่อนจึงจะสั่งให้ AI ประเมินเคสได้ ตอนนี้แสดงผลที่เคยประเมินไว้แล้วเท่านั้น</div>';
+  }
+  if (S.ai.health === 'down' && S.ai.healthMsg) {
+    html += '<div class="msg err">' + esc(S.ai.healthMsg) + '</div>';
+  }
+  if (S.ai.lastErr) {
+    html += '<div class="msg err">เคสล่าสุดที่ไม่สำเร็จ: ' + esc(S.ai.lastErr) + '</div>';
+  }
+  if (S.ai.storeMsg) {
+    html += '<div class="msg warn">' + esc(S.ai.storeMsg) + '</div>';
+  }
+  return html + '</div>';
+}
+
+function aiPaintBar() {
+  var host = $('aiBar');
+  if (host) host.innerHTML = aiBarHTML();
+}
+
+/* สรุปผล AI ที่บันทึกไว้ สำหรับหน้ารายละเอียดเคส */
+function aiDetailSummaryHTML(c) {
+  var a = aiOf(c);
+  var html = '<div style="margin-bottom:12px">' + aiDotHTML(c) + '</div>';
+  if (!a) {
+    return html + '<p class="sub" style="margin:0 0 12px">ยังไม่มีผลจาก AI สำหรับเคสนี้ ' +
+      'กดปุ่มข้างล่างเพื่อให้ AI อ่าน guideline ให้</p>';
+  }
+  html += '<div class="kv" style="margin-top:0">' +
+    kv('ข้อสังเกตของ AI', esc(a.summary || '—')) +
+    kv('ความมั่นใจ', esc(AI_CONF[a.confidence] || '—')) +
+    kv('โมเดล', esc(a.model || '—')) +
+    kv('ประเมินเมื่อ', esc(a.at ? fmtWhen(a.at) : '—')) +
+    '</div>';
+  if (a.unverified) {
+    html += '<div class="ainote" style="color:var(--red)">⚠ ผลครั้งนั้นมีข้ออ้างอิงที่ระบบตรวจไม่พบในไฟล์ guideline ' +
+      'อย่าใช้อ้างอิง ให้กดอ่านใหม่แล้วดูข้อความอ้างอิงเต็มข้างล่าง</div>';
+  }
+  return html;
+}
+
+/* เรียกครั้งเดียวหลังโหลดเคสเสร็จ */
+function aiInit() {
+  if (!S.cases.length) return;
+  Promise.all([aiLoadStored(), aiCheckHealth()]).then(function () {
+    aiPaintBar();
+    S.cases.forEach(function (c) { aiPaintDot(aiKey(c)); });
+    if (S.ai.health === 'ok' && S.session && aiPending().length) aiStart(false);
+  });
+}
+
 /* ================================================================ wiring  */
 
 function afterRender() {
@@ -1339,6 +1692,15 @@ document.addEventListener('click', function (e) {
     case 'doRegister': doRegister(); break;
     case 'closeModal': closeModal(); break;
     case 'logout': logout(); break;
+    case 'aiStop': aiStop(); break;
+    case 'aiStart':
+      if (!S.session) { toast('เข้าสู่ระบบก่อนจึงจะสั่งให้ AI ประเมินได้'); loginModal(); break; }
+      aiStart(false);
+      break;
+    case 'aiRedo':
+      if (!S.session) { toast('เข้าสู่ระบบก่อนจึงจะสั่งให้ AI ประเมินได้'); loginModal(); break; }
+      aiStart(true);
+      break;
     case 'toggleDoctors':
       if (!S.session) { toast('เข้าสู่ระบบก่อนจึงจะแสดงชื่อแพทย์ได้'); loginModal(); break; }
       S.showDoctorNames = !S.showDoctorNames;
@@ -1421,7 +1783,222 @@ restoreSession().then(function () {
 });
 
 </script>
-  <!-- ===================================================================
+<!-- RDU-AI-PANEL เริ่ม — ผู้ช่วยอ่าน guideline (อ่านอย่างเดียว ไม่แตะสถานะเคส) -->
+<script>
+/*!
+ * rdu-ai-panel.js — แผง "ข้อเสนอแนะจาก AI" สำหรับเว็บ RDU
+ *
+ * หลักการที่ยึดไว้:
+ *  1) แผงนี้ "อ่านอย่างเดียว" ไม่แตะสถานะเคส ไม่เขียนอะไรลง Google Sheets
+ *  2) ทุกข้อความมีป้ายกำกับชัดเจนว่าเป็นข้อเสนอแนะ ไม่ใช่ผลประเมิน
+ *  3) ข้ออ้างอิงที่ระบบตรวจไม่พบใน guideline จะถูกติดป้ายเตือนเสมอ
+ *
+ * วิธีใช้ใน index.html:
+ *   ใส่แท็ก script ที่ชี้มาที่ไฟล์นี้ใน index.html
+ *   ...
+ *   RDUAI.mount(elementที่จะให้แผงไปอยู่, objectข้อมูลเคส);
+ */
+(function (global) {
+  'use strict';
+
+  var CFG = {
+    endpoint: global.RDU_AI_ENDPOINT || 'http://127.0.0.1:8000',
+    apiKey: global.RDU_AI_KEY || '',
+    // ต้องล็อกอินก่อนจึงใช้ได้ — ส่งฟังก์ชันที่คืน true/false เข้ามา
+    isAllowed: function () { return true; }
+  };
+
+  var LABEL = {
+    appropriate: { text: 'ข้อสังเกต: สอดคล้องกับ guideline', cls: 'ok' },
+    not_appropriate: { text: 'ข้อสังเกต: อาจไม่สอดคล้องกับ guideline', cls: 'warn' },
+    insufficient_data: { text: 'ข้อมูลไม่พอสรุป', cls: 'neutral' }
+  };
+  var CONF = { high: 'ความมั่นใจสูง', medium: 'ความมั่นใจปานกลาง', low: 'ความมั่นใจต่ำ' };
+
+  var CSS = [
+    '.rdu-ai{border:1px solid #e6d7d7;border-radius:6px;padding:12px;margin-top:10px;background:#fffafa;font-size:14px;line-height:1.65}',
+    '.rdu-ai h4{margin:0 0 8px;font-size:14px;font-weight:600;color:#8c1c1c;display:flex;align-items:center;gap:8px}',
+    '.rdu-ai .rdu-ai-note{background:#fff3f3;border-left:3px solid #b02a2a;padding:8px 10px;border-radius:3px;color:#6b2020;font-size:12.5px;margin-bottom:10px}',
+    '.rdu-ai button{background:#b02a2a;color:#fff;border:0;border-radius:4px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit}',
+    '.rdu-ai button:hover{background:#8c1c1c}',
+    '.rdu-ai button[disabled]{background:#c9a9a9;cursor:not-allowed}',
+    '.rdu-ai .badge{display:inline-block;padding:2px 9px;border-radius:3px;font-size:12px;font-weight:600}',
+    '.rdu-ai .badge.ok{background:#e7f3ea;color:#1f6b39}',
+    '.rdu-ai .badge.warn{background:#fdeaea;color:#a02020}',
+    '.rdu-ai .badge.neutral{background:#eef0f2;color:#4a5157}',
+    '.rdu-ai .meta{color:#7a7a7a;font-size:12px;margin-left:auto;font-weight:400}',
+    '.rdu-ai ul{margin:8px 0 0;padding-left:18px}',
+    '.rdu-ai li{margin-bottom:8px}',
+    '.rdu-ai blockquote{margin:4px 0 0;padding:6px 10px;background:#f6f2f2;border-left:2px solid #c9a9a9;color:#4a4444;font-size:12.5px;border-radius:0 3px 3px 0}',
+    '.rdu-ai .flag{color:#a02020;font-size:12px;font-weight:600}',
+    '.rdu-ai .src{margin-top:10px;font-size:12.5px;color:#5a5a5a}',
+    '.rdu-ai .src summary{cursor:pointer;color:#8c1c1c}',
+    '.rdu-ai .err{background:#fdeaea;border:1px solid #e8b4b4;color:#8c1c1c;padding:9px 11px;border-radius:4px}',
+    '.rdu-ai .stale{background:#fbf1e2;border-left:3px solid #a5601c;color:#6b4410;padding:9px 12px;border-radius:0 3px 3px 0;font-size:13px;margin-bottom:10px}'
+  ].join('');
+
+  function injectCSS() {
+    if (document.getElementById('rdu-ai-style')) return;
+    var s = document.createElement('style');
+    s.id = 'rdu-ai-style';
+    s.textContent = CSS;
+    document.head.appendChild(s);
+  }
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function configure(opts) {
+    for (var k in opts) if (Object.prototype.hasOwnProperty.call(opts, k)) CFG[k] = opts[k];
+  }
+
+  function assess(caseObj, question) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (CFG.apiKey) headers['X-RDU-Key'] = CFG.apiKey;
+
+    return fetch(CFG.endpoint.replace(/\/+$/, '') + '/assess', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ case: caseObj, question: question || null })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (body) {
+        if (!r.ok) throw new Error(body.detail || ('เซิร์ฟเวอร์ตอบรหัส ' + r.status));
+        return body;
+      });
+    });
+  }
+
+  function health() {
+    return fetch(CFG.endpoint.replace(/\/+$/, '') + '/health').then(function (r) { return r.json(); });
+  }
+
+  function renderResult(res) {
+    var lab = LABEL[res.opinion] || LABEL.insufficient_data;
+    var html = '';
+
+    html += '<div class="rdu-ai-note">' + esc(res.disclaimer || '') + '</div>';
+
+    if (res.index_stale) {
+      var ch = res.index_changes || {};
+      var parts = [];
+      if ((ch.added || []).length) parts.push('เพิ่ม: ' + ch.added.join(', '));
+      if ((ch.removed || []).length) parts.push('ลบ: ' + ch.removed.join(', '));
+      if ((ch.changed || []).length) parts.push('แก้ไข: ' + ch.changed.join(', '));
+      html += '<div class="stale"><strong>⚠ ไฟล์ guideline เปลี่ยนไปหลังสร้างดัชนีครั้งล่าสุด</strong><br>' +
+        (parts.length ? esc(parts.join(' · ')) + '<br>' : '') +
+        'ผลข้างล่างยังอ้างอิงจากไฟล์ชุดเดิม สั่งสร้างดัชนีใหม่ก่อนใช้อ้างอิงจริง</div>';
+    }
+    html += '<div><span class="badge ' + lab.cls + '">' + esc(lab.text) + '</span> ';
+    html += '<span class="meta">' + esc(CONF[res.confidence] || '') +
+            ' · ' + esc(res.model || '') + ' · ' + esc(res.elapsed_sec || 0) + ' วินาที</span></div>';
+
+    if (res.summary) html += '<p style="margin:9px 0 0">' + esc(res.summary) + '</p>';
+
+    var reasons = res.reasons || [];
+    if (reasons.length) {
+      html += '<ul>';
+      for (var i = 0; i < reasons.length; i++) {
+        var r = reasons[i];
+        html += '<li>' + esc(r.point);
+        if (!r.verified) {
+          html += ' <span class="flag">⚠ ไม่พบข้อความนี้ในไฟล์ guideline — อย่าใช้อ้างอิง</span>';
+        }
+        if (r.quote) {
+          html += '<blockquote>“' + esc(r.quote) + '”' +
+                  (r.page ? ' <span style="color:#8c6a6a">(หน้า ' + esc(r.page) + ')</span>' : '') +
+                  '</blockquote>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+    }
+
+    if ((res.missing_info || []).length) {
+      html += '<p style="margin:10px 0 0"><strong>ข้อมูลที่ยังขาด</strong></p><ul>';
+      for (var j = 0; j < res.missing_info.length; j++) html += '<li>' + esc(res.missing_info[j]) + '</li>';
+      html += '</ul>';
+    }
+
+    if (res.notes_for_reviewer) {
+      html += '<p style="margin:10px 0 0"><strong>ขอให้อาจารย์แพทย์ตรวจซ้ำ:</strong> ' +
+              esc(res.notes_for_reviewer) + '</p>';
+    }
+
+    var srcs = res.sources || [];
+    if (srcs.length) {
+      html += '<details class="src"><summary>ข้อความจาก guideline ที่ระบบใช้ (' + srcs.length + ' ชิ้น)</summary>';
+      for (var k = 0; k < srcs.length; k++) {
+        html += '<blockquote><strong>' + esc(srcs[k].source) + ' หน้า ' + esc(srcs[k].page) +
+                '</strong> (คะแนนความใกล้เคียง ' + esc(srcs[k].score) + ')<br>' +
+                esc(srcs[k].text) + '</blockquote>';
+      }
+      html += '</details>';
+    }
+    return html;
+  }
+
+  /**
+   * วางแผงลงใน container
+   * @param {HTMLElement} container  กล่องที่จะให้แผงไปอยู่
+   * @param {Object|Function} caseObj ข้อมูลเคส หรือฟังก์ชันที่คืนข้อมูลเคส
+   */
+  function mount(container, caseObj, onResult) {
+    injectCSS();
+    var box = document.createElement('div');
+    box.className = 'rdu-ai';
+    box.innerHTML =
+      '<h4>ข้อเสนอแนะจาก AI <span style="font-weight:400;color:#7a7a7a">(ไม่ใช่ผลประเมิน)</span></h4>' +
+      '<button type="button">ให้ AI อ่าน guideline ให้</button>' +
+      '<div class="rdu-ai-body" style="margin-top:10px"></div>';
+    container.appendChild(box);
+
+    var btn = box.querySelector('button');
+    var body = box.querySelector('.rdu-ai-body');
+
+    btn.addEventListener('click', function () {
+      if (!CFG.isAllowed()) {
+        body.innerHTML = '<div class="err">กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้</div>';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'กำลังอ่าน guideline ...';
+      body.innerHTML = '<div style="color:#7a7a7a">โมเดลกำลังทำงานบนเครื่อง อาจใช้เวลา 10–60 วินาที</div>';
+
+      var data = typeof caseObj === 'function' ? caseObj() : caseObj;
+      assess(data)
+        .then(function (res) {
+          body.innerHTML = renderResult(res);
+          if (typeof onResult === 'function') { try { onResult(res); } catch (e) {} }
+        })
+        .catch(function (err) {
+          body.innerHTML = '<div class="err"><strong>เรียกใช้ AI ไม่สำเร็จ</strong><br>' + esc(err.message) +
+            '<br><span style="font-size:12px">ตรวจว่า ollama serve และ uvicorn ทำงานอยู่ แล้วเปิด ' +
+            esc(CFG.endpoint) + '/health ดูสถานะ</span></div>';
+        })
+        .then(function () {
+          btn.disabled = false;
+          btn.textContent = 'ให้ AI อ่าน guideline ให้อีกครั้ง';
+        });
+    });
+
+    return box;
+  }
+
+  global.RDUAI = { configure: configure, assess: assess, health: health, mount: mount, render: renderResult };
+})(window);
+
+</script>
+<script>
+  RDUAI.configure({
+    endpoint: 'http://127.0.0.1:8000',   // ขึ้น server รพ. แล้วเปลี่ยนเป็น https://...
+    apiKey: '',                          // ใส่ค่าเดียวกับ RDU_API_KEY ตอนขึ้น server
+    isAllowed: function () { return !!(window.S && S.session); }
+  });
+</script>
+<!-- ===================================================================
      แผง "ข้อเสนอแนะจาก AI" สำหรับเว็บ NL_ATB_Audit  (ฉบับแปะก้อนเดียว)
      วิธีใช้: คัดลอกทั้งไฟล์นี้ แล้ววางไว้ "ก่อนบรรทัด </body>" ใน index.html
      ไม่ต้องสร้างไฟล์ .js แยก ไม่ต้องคัดลอกไฟล์ไปไหน
