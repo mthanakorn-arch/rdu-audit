@@ -1495,5 +1495,267 @@ restoreSession().then(function () {
 });
 
 </script>
+  <!-- ===================================================================
+     แผง "ข้อเสนอแนะจาก AI" สำหรับเว็บ NL_ATB_Audit  (ฉบับแปะก้อนเดียว)
+     วิธีใช้: คัดลอกทั้งไฟล์นี้ แล้ววางไว้ "ก่อนบรรทัด </body>" ใน index.html
+     ไม่ต้องสร้างไฟล์ .js แยก ไม่ต้องคัดลอกไฟล์ไปไหน
+     =================================================================== -->
+<script>
+/*!
+ * rdu-ai-panel.js — แผง "ข้อเสนอแนะจาก AI" สำหรับเว็บ RDU
+ *
+ * หลักการที่ยึดไว้:
+ *  1) แผงนี้ "อ่านอย่างเดียว" ไม่แตะสถานะเคส ไม่เขียนอะไรลง Google Sheets
+ *  2) ทุกข้อความมีป้ายกำกับชัดเจนว่าเป็นข้อเสนอแนะ ไม่ใช่ผลประเมิน
+ *  3) ข้ออ้างอิงที่ระบบตรวจไม่พบใน guideline จะถูกติดป้ายเตือนเสมอ
+ *
+ * วิธีใช้ใน index.html:
+ *   ใส่แท็ก script ที่ชี้มาที่ไฟล์นี้ใน index.html
+ *   ...
+ *   RDUAI.mount(elementที่จะให้แผงไปอยู่, objectข้อมูลเคส);
+ */
+(function (global) {
+  'use strict';
+
+  var CFG = {
+    endpoint: global.RDU_AI_ENDPOINT || 'http://127.0.0.1:8000',
+    apiKey: global.RDU_AI_KEY || '',
+    // ต้องล็อกอินก่อนจึงใช้ได้ — ส่งฟังก์ชันที่คืน true/false เข้ามา
+    isAllowed: function () { return true; }
+  };
+
+  var LABEL = {
+    appropriate: { text: 'ข้อสังเกต: สอดคล้องกับ guideline', cls: 'ok' },
+    not_appropriate: { text: 'ข้อสังเกต: อาจไม่สอดคล้องกับ guideline', cls: 'warn' },
+    insufficient_data: { text: 'ข้อมูลไม่พอสรุป', cls: 'neutral' }
+  };
+  var CONF = { high: 'ความมั่นใจสูง', medium: 'ความมั่นใจปานกลาง', low: 'ความมั่นใจต่ำ' };
+
+  var CSS = [
+    '.rdu-ai{border:1px solid #e6d7d7;border-radius:6px;padding:12px;margin-top:10px;background:#fffafa;font-size:14px;line-height:1.65}',
+    '.rdu-ai h4{margin:0 0 8px;font-size:14px;font-weight:600;color:#8c1c1c;display:flex;align-items:center;gap:8px}',
+    '.rdu-ai .rdu-ai-note{background:#fff3f3;border-left:3px solid #b02a2a;padding:8px 10px;border-radius:3px;color:#6b2020;font-size:12.5px;margin-bottom:10px}',
+    '.rdu-ai button{background:#b02a2a;color:#fff;border:0;border-radius:4px;padding:7px 14px;font-size:13px;cursor:pointer;font-family:inherit}',
+    '.rdu-ai button:hover{background:#8c1c1c}',
+    '.rdu-ai button[disabled]{background:#c9a9a9;cursor:not-allowed}',
+    '.rdu-ai .badge{display:inline-block;padding:2px 9px;border-radius:3px;font-size:12px;font-weight:600}',
+    '.rdu-ai .badge.ok{background:#e7f3ea;color:#1f6b39}',
+    '.rdu-ai .badge.warn{background:#fdeaea;color:#a02020}',
+    '.rdu-ai .badge.neutral{background:#eef0f2;color:#4a5157}',
+    '.rdu-ai .meta{color:#7a7a7a;font-size:12px;margin-left:auto;font-weight:400}',
+    '.rdu-ai ul{margin:8px 0 0;padding-left:18px}',
+    '.rdu-ai li{margin-bottom:8px}',
+    '.rdu-ai blockquote{margin:4px 0 0;padding:6px 10px;background:#f6f2f2;border-left:2px solid #c9a9a9;color:#4a4444;font-size:12.5px;border-radius:0 3px 3px 0}',
+    '.rdu-ai .flag{color:#a02020;font-size:12px;font-weight:600}',
+    '.rdu-ai .src{margin-top:10px;font-size:12.5px;color:#5a5a5a}',
+    '.rdu-ai .src summary{cursor:pointer;color:#8c1c1c}',
+    '.rdu-ai .err{background:#fdeaea;border:1px solid #e8b4b4;color:#8c1c1c;padding:9px 11px;border-radius:4px}',
+    '.rdu-ai .stale{background:#fbf1e2;border-left:3px solid #a5601c;color:#6b4410;padding:9px 12px;border-radius:0 3px 3px 0;font-size:13px;margin-bottom:10px}'
+  ].join('');
+
+  function injectCSS() {
+    if (document.getElementById('rdu-ai-style')) return;
+    var s = document.createElement('style');
+    s.id = 'rdu-ai-style';
+    s.textContent = CSS;
+    document.head.appendChild(s);
+  }
+
+  function esc(v) {
+    return String(v == null ? '' : v)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+  }
+
+  function configure(opts) {
+    for (var k in opts) if (Object.prototype.hasOwnProperty.call(opts, k)) CFG[k] = opts[k];
+  }
+
+  function assess(caseObj, question) {
+    var headers = { 'Content-Type': 'application/json' };
+    if (CFG.apiKey) headers['X-RDU-Key'] = CFG.apiKey;
+
+    return fetch(CFG.endpoint.replace(/\/+$/, '') + '/assess', {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({ case: caseObj, question: question || null })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (body) {
+        if (!r.ok) throw new Error(body.detail || ('เซิร์ฟเวอร์ตอบรหัส ' + r.status));
+        return body;
+      });
+    });
+  }
+
+  function health() {
+    return fetch(CFG.endpoint.replace(/\/+$/, '') + '/health').then(function (r) { return r.json(); });
+  }
+
+  function renderResult(res) {
+    var lab = LABEL[res.opinion] || LABEL.insufficient_data;
+    var html = '';
+
+    html += '<div class="rdu-ai-note">' + esc(res.disclaimer || '') + '</div>';
+
+    if (res.index_stale) {
+      var ch = res.index_changes || {};
+      var parts = [];
+      if ((ch.added || []).length) parts.push('เพิ่ม: ' + ch.added.join(', '));
+      if ((ch.removed || []).length) parts.push('ลบ: ' + ch.removed.join(', '));
+      if ((ch.changed || []).length) parts.push('แก้ไข: ' + ch.changed.join(', '));
+      html += '<div class="stale"><strong>⚠ ไฟล์ guideline เปลี่ยนไปหลังสร้างดัชนีครั้งล่าสุด</strong><br>' +
+        (parts.length ? esc(parts.join(' · ')) + '<br>' : '') +
+        'ผลข้างล่างยังอ้างอิงจากไฟล์ชุดเดิม สั่งสร้างดัชนีใหม่ก่อนใช้อ้างอิงจริง</div>';
+    }
+    html += '<div><span class="badge ' + lab.cls + '">' + esc(lab.text) + '</span> ';
+    html += '<span class="meta">' + esc(CONF[res.confidence] || '') +
+            ' · ' + esc(res.model || '') + ' · ' + esc(res.elapsed_sec || 0) + ' วินาที</span></div>';
+
+    if (res.summary) html += '<p style="margin:9px 0 0">' + esc(res.summary) + '</p>';
+
+    var reasons = res.reasons || [];
+    if (reasons.length) {
+      html += '<ul>';
+      for (var i = 0; i < reasons.length; i++) {
+        var r = reasons[i];
+        html += '<li>' + esc(r.point);
+        if (!r.verified) {
+          html += ' <span class="flag">⚠ ไม่พบข้อความนี้ในไฟล์ guideline — อย่าใช้อ้างอิง</span>';
+        }
+        if (r.quote) {
+          html += '<blockquote>“' + esc(r.quote) + '”' +
+                  (r.page ? ' <span style="color:#8c6a6a">(หน้า ' + esc(r.page) + ')</span>' : '') +
+                  '</blockquote>';
+        }
+        html += '</li>';
+      }
+      html += '</ul>';
+    }
+
+    if ((res.missing_info || []).length) {
+      html += '<p style="margin:10px 0 0"><strong>ข้อมูลที่ยังขาด</strong></p><ul>';
+      for (var j = 0; j < res.missing_info.length; j++) html += '<li>' + esc(res.missing_info[j]) + '</li>';
+      html += '</ul>';
+    }
+
+    if (res.notes_for_reviewer) {
+      html += '<p style="margin:10px 0 0"><strong>ขอให้อาจารย์แพทย์ตรวจซ้ำ:</strong> ' +
+              esc(res.notes_for_reviewer) + '</p>';
+    }
+
+    var srcs = res.sources || [];
+    if (srcs.length) {
+      html += '<details class="src"><summary>ข้อความจาก guideline ที่ระบบใช้ (' + srcs.length + ' ชิ้น)</summary>';
+      for (var k = 0; k < srcs.length; k++) {
+        html += '<blockquote><strong>' + esc(srcs[k].source) + ' หน้า ' + esc(srcs[k].page) +
+                '</strong> (คะแนนความใกล้เคียง ' + esc(srcs[k].score) + ')<br>' +
+                esc(srcs[k].text) + '</blockquote>';
+      }
+      html += '</details>';
+    }
+    return html;
+  }
+
+  /**
+   * วางแผงลงใน container
+   * @param {HTMLElement} container  กล่องที่จะให้แผงไปอยู่
+   * @param {Object|Function} caseObj ข้อมูลเคส หรือฟังก์ชันที่คืนข้อมูลเคส
+   */
+  function mount(container, caseObj) {
+    injectCSS();
+    var box = document.createElement('div');
+    box.className = 'rdu-ai';
+    box.innerHTML =
+      '<h4>ข้อเสนอแนะจาก AI <span style="font-weight:400;color:#7a7a7a">(ไม่ใช่ผลประเมิน)</span></h4>' +
+      '<button type="button">ให้ AI อ่าน guideline ให้</button>' +
+      '<div class="rdu-ai-body" style="margin-top:10px"></div>';
+    container.appendChild(box);
+
+    var btn = box.querySelector('button');
+    var body = box.querySelector('.rdu-ai-body');
+
+    btn.addEventListener('click', function () {
+      if (!CFG.isAllowed()) {
+        body.innerHTML = '<div class="err">กรุณาเข้าสู่ระบบก่อนใช้งานส่วนนี้</div>';
+        return;
+      }
+      btn.disabled = true;
+      btn.textContent = 'กำลังอ่าน guideline ...';
+      body.innerHTML = '<div style="color:#7a7a7a">โมเดลกำลังทำงานบนเครื่อง อาจใช้เวลา 10–60 วินาที</div>';
+
+      var data = typeof caseObj === 'function' ? caseObj() : caseObj;
+      assess(data)
+        .then(function (res) { body.innerHTML = renderResult(res); })
+        .catch(function (err) {
+          body.innerHTML = '<div class="err"><strong>เรียกใช้ AI ไม่สำเร็จ</strong><br>' + esc(err.message) +
+            '<br><span style="font-size:12px">ตรวจว่า ollama serve และ uvicorn ทำงานอยู่ แล้วเปิด ' +
+            esc(CFG.endpoint) + '/health ดูสถานะ</span></div>';
+        })
+        .then(function () {
+          btn.disabled = false;
+          btn.textContent = 'ให้ AI อ่าน guideline ให้อีกครั้ง';
+        });
+    });
+
+    return box;
+  }
+
+  global.RDUAI = { configure: configure, assess: assess, health: health, mount: mount, render: renderResult };
+})(window);
+
+</script>
+
+<script>
+  /* ---------- ตั้งค่า ---------- */
+  RDUAI.configure({
+    endpoint: 'http://127.0.0.1:8000',   // ขึ้น server รพ. แล้วเปลี่ยนเป็น https://...
+    apiKey: '',                          // ใส่ค่าเดียวกับ RDU_API_KEY ตอนขึ้น server
+    isAllowed: function () { return true; }
+  });
+
+  /* ---------- ปุ่มลอยสำหรับทดสอบ ----------
+     ก้อนนี้ทำให้ทดลองใช้ได้ทันที โดยยังไม่ต้องแก้โค้ดส่วนที่วาดรายการเคส
+     จะมีปุ่มเล็ก ๆ ลอยอยู่มุมขวาล่าง กดแล้วกรอกข้อมูลเคสเองเพื่อทดสอบ
+     เมื่อฝังแผงเข้ากับกล่องเคสจริงได้แล้ว ลบก้อนนี้ทิ้งได้ */
+  (function () {
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = 'ทดสอบ AI';
+    btn.style.cssText = 'position:fixed;right:16px;bottom:16px;z-index:9999;background:#b02a2a;' +
+      'color:#fff;border:0;border-radius:4px;padding:9px 14px;font-size:13px;cursor:pointer;' +
+      'font-family:inherit;box-shadow:0 2px 6px rgba(0,0,0,.2)';
+
+    var box = document.createElement('div');
+    box.style.cssText = 'position:fixed;right:16px;bottom:60px;z-index:9999;width:min(460px,92vw);' +
+      'max-height:70vh;overflow:auto;background:#fff;border:1px solid #e3d9d9;border-radius:6px;' +
+      'padding:14px;display:none;box-shadow:0 6px 24px rgba(0,0,0,.18);font-family:inherit';
+    box.innerHTML =
+      '<div style="font-size:13px;color:#6b5e5c;margin-bottom:8px">' +
+      'กรอกข้อมูลเคสเพื่อทดสอบ (ห้ามใส่ HN / AN / ชื่อผู้ป่วย)</div>' +
+      '<input id="rduT1" placeholder="การวินิจฉัย" style="width:100%;margin-bottom:6px;padding:7px;' +
+      'border:1px solid #d3c3c1;border-radius:3px;font-family:inherit">' +
+      '<textarea id="rduT2" rows="3" placeholder="คำสั่งยา (ข้อความเต็มตามชีต)" ' +
+      'style="width:100%;margin-bottom:6px;padding:7px;border:1px solid #d3c3c1;border-radius:3px;' +
+      'font-family:inherit"></textarea>' +
+      '<input id="rduT3" placeholder="ข้อบ่งใช้ที่ระบุ" style="width:100%;padding:7px;' +
+      'border:1px solid #d3c3c1;border-radius:3px;font-family:inherit">' +
+      '<div id="rduTmount"></div>';
+
+    document.body.appendChild(btn);
+    document.body.appendChild(box);
+
+    btn.addEventListener('click', function () {
+      box.style.display = box.style.display === 'none' ? 'block' : 'none';
+    });
+
+    RDUAI.mount(box.querySelector('#rduTmount'), function () {
+      return {
+        'การวินิจฉัย': box.querySelector('#rduT1').value,
+        'คำสั่งยา': box.querySelector('#rduT2').value,
+        'ข้อบ่งใช้ที่ระบุ': box.querySelector('#rduT3').value
+      };
+    });
+  })();
+</script>
 </body>
 </html>
