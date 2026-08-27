@@ -403,7 +403,7 @@ a{color:var(--red)}
 
 var API = '/api/rdu';
 /** ป้ายเวอร์ชัน — ใช้ตรวจว่าหน้าเว็บที่เปิดอยู่เป็นไฟล์ล่าสุดจริงหรือไม่ (แสดงท้ายหน้า) */
-var BUILD = '2026-08-27 · auto-refresh';
+var BUILD = '2026-08-27 · ai-no-login';
 /** ดึงข้อมูลจาก Google Sheets ซ้ำทุกกี่มิลลิวินาที (60000 = 1 นาที) */
 var REFRESH_MS = 60000;
 var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -643,7 +643,7 @@ function quietReload() {
     window.scrollTo(0, y);
     if (S.cases.length > before) toast('มีเคสใหม่ ' + (S.cases.length - before) + ' เคส');
     // มีเคสใหม่ที่ยังไม่มีผล AI → ให้ไล่ประเมินต่อทันที
-    if (S.ai.health === 'ok' && S.session && !S.ai.running && aiPending().length) aiStart(false);
+    if (S.ai.health === 'ok' && !S.ai.running && aiPending().length) aiStart(false);
   }).catch(function (err) {
     S.syncErr = err.message || String(err);   // เก็บข้อมูลเดิมไว้ ไม่ล้างหน้าจอ
     updateFooter();
@@ -654,10 +654,16 @@ function quietReload() {
 function canAutoRefresh() {
   if (document.hidden) return false;                      // ไม่ได้ดูแท็บนี้อยู่
   if (S.syncing || S.loading) return false;
-  if (S.ai.running) return false;                         // AI กำลังไล่ประเมิน
   if ($('modal').classList.contains('on')) return false;  // กล่องเข้าสู่ระบบ/สมัครเปิดอยู่
-  if (document.querySelector('.cform')) return false;     // กำลังพิมพ์เหตุผลยืนยันค้างอยู่
   if (S.page === 'users') return false;                   // หน้าจัดการผู้ใช้มีตัวโหลดของตัวเอง
+
+  // AI กำลังไล่ประเมิน — กันไว้ไม่เกิน 3 นาที เผื่อบริการ AI ค้างแล้วบล็อกถาวร
+  if (S.ai.running && (Date.now() - (S.ai.startedAt || 0)) < 180000) return false;
+
+  // กันเฉพาะตอนที่กำลังกรอกเหตุผลอยู่จริง ๆ (มีข้อความ หรือเคอร์เซอร์อยู่ในช่อง)
+  var note = document.querySelector('[data-cf-note]');
+  if (note && (String(note.value).trim() || document.activeElement === note)) return false;
+
   return true;
 }
 
@@ -885,7 +891,9 @@ function viewFooter() {
   return '<div class="foot">ข้อมูลเคสทั้งหมดอ่านจาก Google Sheets โดยตรงทุกครั้งที่เปิดหน้า ' +
     '· ผลเบื้องต้นประเมินโดยระบบตามแนวทางที่นำเข้าไว้ อาจารย์แพทย์ยืนยันทับได้ทุกเคส และผลของอาจารย์แพทย์ถือเป็นที่สุด ' +
     '· อาจารย์แพทย์ยืนยันแล้ว ' + t.confirmed + ' จาก ' + t.total + ' เคส' +
-    '<span class="build">' + syncLine() + ' · เวอร์ชันหน้าเว็บ ' + esc(BUILD) + '</span></div>';
+    '<span class="build"><button data-act="syncNow" style="font:inherit;color:inherit;' +
+    'text-decoration:underline;text-underline-offset:2px;cursor:pointer">' + syncLine() +
+    '</button> · เวอร์ชันหน้าเว็บ ' + esc(BUILD) + '</span></div>';
 }
 
 /** บรรทัดบอกสถานะการดึงข้อมูลอัตโนมัติ */
@@ -1629,7 +1637,7 @@ function aiPersist(no, rec) {
   var k = String(no).trim();
   S.ai.by[k] = rec;
   var local = aiReadLocal(); local[k] = rec; aiWriteLocal(local);   // เก็บสำเนาไว้เสมอ
-  if (S.ai.store !== 'sheet' || !S.session) return Promise.resolve();
+  if (S.ai.store !== 'sheet') return Promise.resolve();
   return api('aiSave', {
     case_no: k, opinion: rec.opinion, confidence: rec.confidence || '',
     summary: rec.summary || '', model: rec.model || '', unverified: rec.unverified ? 1 : 0
@@ -1680,10 +1688,11 @@ function aiPending() {
 
 function aiStart(force) {
   if (S.ai.running || S.ai.health !== 'ok') return;
-  if (!S.session) return;                       // ต้องล็อกอินก่อนจึงสั่งให้ AI ทำงานได้
+  /* ประเมินได้แม้ยังไม่เข้าสู่ระบบ — ผล AI เป็นผลเบื้องต้น
+     ส่วนการยืนยันของอาจารย์แพทย์ยังต้องเข้าสู่ระบบเหมือนเดิม */
   var todo = force ? S.cases.slice() : aiPending();
   if (!todo.length) { aiPaintBar(); return; }
-  S.ai.running = true; S.ai.stopped = false;
+  S.ai.running = true; S.ai.stopped = false; S.ai.startedAt = Date.now();
   S.ai.done = 0; S.ai.fail = 0; S.ai.total = todo.length; S.ai.lastErr = '';
   aiPaintBar();
   aiRunNext(todo, 0);
@@ -1784,7 +1793,8 @@ function aiBarHTML() {
     'ผลที่ถือเป็นที่สุดคือแถบสีที่ขอบซ้ายของแถว ซึ่งเปลี่ยนได้เมื่ออาจารย์แพทย์ยืนยันพร้อมเหตุผลเท่านั้น</div>';
 
   if (S.ai.health === 'ok' && !S.session) {
-    html += '<div class="msg warn">เข้าสู่ระบบก่อนจึงจะสั่งให้ AI ประเมินเคสได้ ตอนนี้แสดงผลที่เคยประเมินไว้แล้วเท่านั้น</div>';
+    html += '<div class="msg warn">ยังไม่ได้เข้าสู่ระบบ — AI ประเมินเคสที่ยังไม่มีผลได้ตามปกติ ' +
+      'แต่ประเมินซ้ำทับผลเดิม และยืนยันผลของอาจารย์แพทย์ ต้องเข้าสู่ระบบก่อน</div>';
   }
   if (S.ai.health === 'down' && S.ai.healthMsg) {
     html += '<div class="msg err">' + esc(S.ai.healthMsg) + '</div>';
@@ -1831,7 +1841,7 @@ function aiInit() {
     render();                       // ผล AI ที่โหลดมาเปลี่ยนสถานะเคส จึงต้องวาดหน้าใหม่ก่อน
     aiPaintBar();
     S.cases.forEach(function (c) { aiPaintDot(aiKey(c)); });
-    if (S.ai.health === 'ok' && S.session && aiPending().length) aiStart(false);
+    if (S.ai.health === 'ok' && aiPending().length) aiStart(false);
   });
 }
 
@@ -1890,6 +1900,7 @@ document.addEventListener('click', function (e) {
   }
 
   switch (t.getAttribute('data-act')) {
+    case 'syncNow': toast('กำลังดึงข้อมูลจากชีต…'); quietReload(); break;
     case 'login': loginModal(); break;
     case 'loginModal': loginModal(); break;
     case 'registerModal': registerModal(); break;
@@ -1898,12 +1909,9 @@ document.addEventListener('click', function (e) {
     case 'closeModal': closeModal(); break;
     case 'logout': logout(); break;
     case 'aiStop': aiStop(); break;
-    case 'aiStart':
-      if (!S.session) { toast('เข้าสู่ระบบก่อนจึงจะสั่งให้ AI ประเมินได้'); loginModal(); break; }
-      aiStart(false);
-      break;
+    case 'aiStart': aiStart(false); break;
     case 'aiRedo':
-      if (!S.session) { toast('เข้าสู่ระบบก่อนจึงจะสั่งให้ AI ประเมินได้'); loginModal(); break; }
+      if (!S.session) { toast('ประเมินซ้ำทับผลเดิมได้เฉพาะผู้ที่เข้าสู่ระบบ'); loginModal(); break; }
       aiStart(true);
       break;
     case 'toggleDoctors':
