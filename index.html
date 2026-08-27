@@ -73,7 +73,7 @@ a{color:var(--red)}
 .dw-top h2{margin:0;font-family:var(--serif);font-size:15.5px;color:var(--red);font-weight:600}
 .dw-top p{margin:1px 0 0;font-size:12px;color:var(--muted);line-height:1.4}
 .dw-x{margin-left:auto;font-size:19px;color:var(--muted);line-height:1;padding:2px 4px}
-.dw-body{flex:1;overflow:auto;padding:14px 0}
+.dw-body{flex:1;overflow:auto;padding:14px 0;display:flex;flex-direction:column;min-height:0}
 .dw-grp{padding:12px 18px 6px;font-size:11.5px;letter-spacing:.08em;color:var(--muted)}
 .dw-i{display:flex;align-items:center;gap:8px;padding:11px 18px;color:var(--red);font-size:14.5px;
   border-left:3px solid transparent;width:100%;text-align:left}
@@ -81,7 +81,9 @@ a{color:var(--red)}
 .dw-i.on{background:var(--red-l);border-left-color:var(--red);font-weight:600}
 .dw-i .pill{margin-left:auto;background:var(--red);color:#fff;font-size:11px;font-family:var(--mono);
   border-radius:999px;padding:1px 7px}
-.dw-admin{margin-top:auto;border-top:1px solid var(--line);padding-top:8px}
+.dw-admin{margin-top:auto;border-top:1px solid var(--line);padding-top:8px;flex:none}
+/* "จัดการผู้ใช้" อยู่ท้ายสุดของแถบเสมอ พร้อมเส้นคั่นแยกส่วนผู้ดูแลระบบ */
+.tabs-in .tab-end{border-left:1px solid var(--line);padding-left:26px;margin-left:4px}
 .dw-foot{border-top:1px solid var(--line);padding:14px 18px 16px}
 .dw-foot .u{font-size:14px;font-weight:600}
 .dw-foot .s{font-size:12.5px;color:var(--muted);margin-top:2px}
@@ -151,8 +153,18 @@ a{color:var(--red)}
 .plist{margin-top:14px;display:flex;flex-direction:column;gap:11px}
 .prow .t{display:flex;justify-content:space-between;gap:12px;font-size:13.5px;margin-bottom:4px}
 .prow .t b{font-family:var(--mono);font-weight:500;color:var(--muted)}
-.ptrack{height:9px;background:#F0EAEA;border-radius:2px;overflow:hidden}
-.ptrack i{display:block;height:100%;background:var(--red);border-radius:2px}
+.ptrack{height:9px;background:#EFE9E9;border-radius:2px;overflow:hidden;display:flex}
+.ptrack i{display:block;height:100%}
+.ptrack i.g{background:var(--green)}
+.ptrack i.r{background:var(--red)}
+.prow .rt{display:flex;align-items:baseline;gap:8px;white-space:nowrap}
+.prow .rt b{font-family:var(--mono);font-weight:600}
+.prow .rt b.g{color:var(--green)} .prow .rt b.r{color:var(--red)}
+.prow .cnt{font-family:var(--mono);font-size:12px;color:var(--muted);font-weight:400}
+.rate{display:flex;flex-direction:column;align-items:flex-end;gap:5px}
+.rate-n{font-family:var(--mono);font-weight:600}
+.rate-n.g{color:var(--green)} .rate-n.r{color:var(--red)}
+.ptrack.mini{width:104px;height:6px}
 
 /* table */
 .tbl{width:100%;border-collapse:collapse;margin-top:14px;font-size:13.5px}
@@ -267,6 +279,10 @@ a{color:var(--red)}
 .flags{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
 .flag{border:1px solid var(--line-2);border-radius:var(--r);padding:5px 10px;font-size:12.5px;color:var(--muted)}
 .flag.on{border-color:var(--red);background:var(--red-l);color:var(--red-d);font-weight:600}
+.grade{font-family:var(--mono);font-weight:700;background:var(--red);color:#fff;border-radius:2px;
+  padding:1px 7px;margin:0 3px;letter-spacing:.02em}
+.grade.na{background:var(--orange);color:#fff}
+.flag.on:has(.grade.na){border-color:var(--orange);background:#FDF4EC;color:#8E4A11}
 .full{white-space:pre-wrap;font-size:14px;line-height:1.6}
 .danger{border:1px solid var(--red);color:var(--red);border-radius:var(--r);padding:9px 16px;font-size:13.5px;margin-top:12px}
 .danger:hover{background:var(--red-l)}
@@ -301,6 +317,7 @@ a{color:var(--red)}
 /* footer */
 .foot{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;font-size:12.5px;color:var(--muted)}
 .foot code{font-family:var(--mono)}
+.foot .build{display:block;margin-top:6px;font-family:var(--mono);font-size:11.5px;color:var(--line-2)}
 
 .toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:#fff;
   padding:11px 20px;border-radius:var(--r);font-size:14px;z-index:120;opacity:0;pointer-events:none;
@@ -324,6 +341,10 @@ a{color:var(--red)}
   .filters{grid-template-columns:1fr}
   .kv{grid-template-columns:1fr;gap:2px 0}
   .kv dd{margin-bottom:8px}
+  .tbl th,.tbl td{padding:9px 6px}
+  .ptrack.mini{width:64px}
+  .prow .cnt{font-size:11px}
+  .prow .t{gap:8px}
   .wrap{padding:16px 13px 50px}
   .card{padding:15px 14px}
   .crow-b,.crow-cf{padding-left:14px;padding-right:14px}
@@ -381,16 +402,23 @@ a{color:var(--red)}
 /* ============================================================== constants */
 
 var API = '/api/rdu';
+/** ป้ายเวอร์ชัน — ใช้ตรวจว่าหน้าเว็บที่เปิดอยู่เป็นไฟล์ล่าสุดจริงหรือไม่ (แสดงท้ายหน้า) */
+var BUILD = '2026-08-27 · ai-status';
 var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 var FLAG_LABELS = [
-  ['tubal',      'ทำหมันหลังคลอด (Tubal resection)'],
-  ['balloon',    'ใส่บอลลูนห้ามเลือด (Balloon tamponade)'],
+  ['tear',       'แผลฝีเย็บฉีกขาด (Perineal tear)'],
   ['hemorrhage', 'ตกเลือดหลังคลอด (Postpartum hemorrhage)'],
-  ['clot',       'ก้อนเลือดคั่ง / ล้วงรก (Blood clot)'],
+  ['balloon',    'ใส่บอลลูนห้ามเลือด (Balloon tamponade)'],
+  ['clot',       'ก้อนเลือดคั่ง / ล้วงรก'],
   ['syphilis',   'ซิฟิลิส (Syphilis)'],
-  ['tear',       'แผลฝีเย็บฉีกขาด (Perineal tear)']
+  ['tubal',      'ทำหมันหลังคลอด (Postpartum Sterilization)']
 ];
+/** ค่าที่ถือว่า "ไม่ระบุระดับ" ในคอลัมน์ tear */
+function isNA(v) {
+  var s = String(v || '').trim().toLowerCase();
+  return s === 'n/a' || s === 'na' || s === '-' || s === 'ไม่ระบุ';
+}
 
 var S = {
   loading: true,
@@ -471,21 +499,39 @@ function drugKey(text) {
 function indicationsOf(c) {
   var out = [];
   var tear = String(c.tear || '').trim();
-  if (tear && tear !== '0') out.push('แผลฝีเย็บฉีกขาดระดับ ' + tear + ' (Perineal tear grade ' + tear + ')');
-  if (isOn(c.tubal)) out.push('ทำหมันหลังคลอด (Tubal resection)');
+  if (tear && tear !== '0') {
+    out.push(isNA(tear)
+      ? 'แผลฝีเย็บฉีกขาด ไม่ระบุระดับ (Perineal tear, grade N/A)'
+      : 'แผลฝีเย็บฉีกขาดระดับ ' + tear + ' (Perineal tear grade ' + tear + ')');
+  }
+  if (isOn(c.tubal)) out.push('ทำหมันหลังคลอด (Postpartum Sterilization)');
   if (isOn(c.balloon)) out.push('ใส่บอลลูนห้ามเลือด (Balloon tamponade)');
   if (isOn(c.hemorrhage)) out.push('ตกเลือดหลังคลอด (Postpartum hemorrhage)');
-  if (isOn(c.clot)) out.push('ก้อนเลือดคั่ง / ล้วงรก (Blood clot)');
+  if (isOn(c.clot)) out.push('ก้อนเลือดคั่ง / ล้วงรก');
   if (isOn(c.syphilis)) out.push('ซิฟิลิส (Syphilis)');
   if (!out.length) out.push('ไม่พบข้อบ่งชี้ที่บันทึกไว้ในเวชระเบียน');
   return out;
 }
 
 function confOf(c) { return S.confirmations[String(c.no).trim()] || null; }
+
+/** ผล AI แปลงเป็นสถานะเคส — insufficient_data ไม่นับ ให้คงเป็นรอประเมิน */
+function aiStatusOf(c) {
+  var a = (typeof aiOf === 'function') ? aiOf(c) : null;
+  if (!a) return null;
+  if (a.opinion === 'appropriate') return 'rational';
+  if (a.opinion === 'not_appropriate') return 'irrational';
+  return null;
+}
+
+/**
+ * สถานะของเคส = ผลอาจารย์แพทย์ถ้ามี ถ้ายังไม่มีก็ใช้ผล AI
+ * ใช้ร่วมกันทั้ง KPI ทะเบียนเคส ตัวกรอง สถิติรายแพทย์ และแถบสีข้างแถว
+ */
 function statusOf(c) {
   var k = confOf(c);
-  if (!k) return 'pending';
-  return k.status === 'rational' ? 'rational' : 'irrational';
+  if (k) return k.status === 'rational' ? 'rational' : 'irrational';
+  return aiStatusOf(c) || 'pending';
 }
 function statusClass(st) { return st === 'rational' ? 'g' : st === 'irrational' ? 'r' : 'p'; }
 function statusText(st) {
@@ -673,12 +719,13 @@ function filteredCases() {
 }
 
 function tally(list) {
-  var t = { total: list.length, rational: 0, irrational: 0, pending: 0 };
+  var t = { total: list.length, rational: 0, irrational: 0, pending: 0, confirmed: 0 };
   list.forEach(function (c) {
     var st = statusOf(c);
     if (st === 'rational') t.rational++;
     else if (st === 'irrational') t.irrational++;
     else t.pending++;
+    if (confOf(c)) t.confirmed++;          // อาจารย์แพทย์ยืนยันแล้วเท่านั้น
   });
   t.done = t.rational + t.irrational;
   return t;
@@ -708,38 +755,56 @@ function renderHeaderAuth() {
   }
 }
 
-function renderTabs() {
+/**
+ * เมนูทั้งระบบอยู่ที่เดียว ใช้ร่วมกันทั้งแถบบนและแถบข้าง
+ * รายการที่ pinEnd: true (เช่น "จัดการผู้ใช้") ถูกดันไปท้ายสุดเสมอ
+ * เพิ่มเมนูใหม่ให้ push เข้า items ตรงจุดที่คอมเมนต์ไว้
+ */
+function navItems() {
   var pending = S.cases.filter(function (c) { return statusOf(c) === 'pending'; }).length;
   var items = [
-    ['dashboard', 'แดชบอร์ด', 0],
-    ['cases', 'เคสทั้งหมด', pending]
+    { id: 'dashboard', label: 'แดชบอร์ด',  group: 'ภาพรวม',   badge: 0 },
+    { id: 'cases',     label: 'เคสทั้งหมด', group: 'ข้อมูลเคส', badge: pending }
+    /* ── เพิ่มเมนูใหม่ตรงนี้ ── */
   ];
-  if (isAdmin()) items.push(['users', 'จัดการผู้ใช้', S.pendingRequests]);
-  $('tabs').innerHTML = items.map(function (it) {
-    return '<button class="tab' + (S.page === it[0] ? ' on' : '') + '" data-page="' + it[0] + '">' +
-      esc(it[1]) + (it[2] ? '<span class="pill">' + it[2] + '</span>' : '') + '</button>';
+  if (isAdmin()) {
+    items.push({ id: 'users', label: 'จัดการผู้ใช้', group: 'ผู้ดูแลระบบ',
+                 badge: S.pendingRequests, pinEnd: true });
+  }
+  return items.sort(function (a, b) { return (a.pinEnd ? 1 : 0) - (b.pinEnd ? 1 : 0); });
+}
+
+function renderTabs() {
+  $('tabs').innerHTML = navItems().map(function (it) {
+    return '<button class="tab' + (S.page === it.id ? ' on' : '') +
+      (it.pinEnd ? ' tab-end' : '') + '" data-page="' + it.id + '">' +
+      esc(it.label) + (it.badge ? '<span class="pill">' + it.badge + '</span>' : '') + '</button>';
   }).join('');
 }
 
 function renderDrawer() {
-  var pending = S.cases.filter(function (c) { return statusOf(c) === 'pending'; }).length;
-  var html = '<div class="dw-grp">ภาพรวม</div>' +
-    '<button class="dw-i' + (S.page === 'dashboard' ? ' on' : '') + '" data-page="dashboard">แดชบอร์ด</button>' +
-    '<div class="dw-grp">ข้อมูลเคส</div>' +
-    '<button class="dw-i' + (S.page === 'cases' ? ' on' : '') + '" data-page="cases">เคสทั้งหมด' +
-      (pending ? '<span class="pill">' + pending + '</span>' : '') + '</button>';
-  if (isAdmin()) {
-    html += '<div class="dw-admin"><div class="dw-grp">ผู้ดูแลระบบ</div>' +
-      '<button class="dw-i' + (S.page === 'users' ? ' on' : '') + '" data-page="users">จัดการผู้ใช้' +
-      (S.pendingRequests ? '<span class="pill">' + S.pendingRequests + '</span>' : '') + '</button></div>';
+  var items = navItems();
+
+  function block(list) {
+    var out = '', lastGroup = null;
+    list.forEach(function (it) {
+      if (it.group !== lastGroup) { out += '<div class="dw-grp">' + esc(it.group) + '</div>'; lastGroup = it.group; }
+      out += '<button class="dw-i' + (S.page === it.id ? ' on' : '') + '" data-page="' + it.id + '">' +
+        esc(it.label) + (it.badge ? '<span class="pill">' + it.badge + '</span>' : '') + '</button>';
+    });
+    return out;
   }
+
+  var pinned = items.filter(function (it) { return it.pinEnd; });
+  var html = block(items.filter(function (it) { return !it.pinEnd; }));
+  if (pinned.length) html += '<div class="dw-admin">' + block(pinned) + '</div>';
   $('dwBody').innerHTML = html;
 
   var t = tally(S.cases);
   if (S.session) {
     $('dwFoot').innerHTML =
       '<div class="u">' + esc(S.session.user.name || S.session.user.username) + '</div>' +
-      '<div class="s">ประเมินแล้ว ' + t.done + ' จาก ' + t.total + ' เคส</div>' +
+      '<div class="s">อาจารย์แพทย์ยืนยันแล้ว ' + t.confirmed + ' จาก ' + t.total + ' เคส</div>' +
       '<button data-act="logout">ออกจากระบบ</button>';
   } else {
     $('dwFoot').innerHTML =
@@ -752,8 +817,9 @@ function renderDrawer() {
 function viewFooter() {
   var t = tally(S.cases);
   return '<div class="foot">ข้อมูลเคสทั้งหมดอ่านจาก Google Sheets โดยตรงทุกครั้งที่เปิดหน้า ' +
-    '· ผลการประเมินทุกเคสมาจากการพิจารณาของอาจารย์แพทย์เท่านั้น ระบบไม่ตัดสินเองอัตโนมัติ ' +
-    '· ประเมินแล้ว ' + t.done + ' จาก ' + t.total + ' เคส</div>';
+    '· ผลเบื้องต้นประเมินโดยระบบตามแนวทางที่นำเข้าไว้ อาจารย์แพทย์ยืนยันทับได้ทุกเคส และผลของอาจารย์แพทย์ถือเป็นที่สุด ' +
+    '· อาจารย์แพทย์ยืนยันแล้ว ' + t.confirmed + ' จาก ' + t.total + ' เคส' +
+    '<span class="build">เวอร์ชันหน้าเว็บ ' + esc(BUILD) + '</span></div>';
 }
 
 function errorBox() {
@@ -786,7 +852,7 @@ function viewDashboard() {
   html += '<div class="card"><div class="card-h"><div>' +
     '<p class="eyebrow">ภาพรวม</p>' +
     '<h3 style="font-size:15px;font-weight:500;color:var(--muted);font-family:var(--sans)">' +
-    'เคสที่อาจารย์แพทย์ยืนยันแล้ว ใช้ผลของอาจารย์แพทย์เป็นเกณฑ์</h3></div>' +
+    'สัดส่วนจากเคสที่มีผลแล้ว — ผลอาจารย์แพทย์มาก่อน ถ้ายังไม่มีใช้ผลเบื้องต้นจาก AI</h3></div>' +
     '<div class="legend">' +
     '<span><i style="background:var(--green)"></i>สมเหตุผล</span>' +
     '<span><i style="background:var(--red)"></i>ไม่สมเหตุผล</span></div></div>';
@@ -813,7 +879,7 @@ function viewDashboard() {
     '<span><i style="background:var(--green)"></i>สมเหตุผล</span>' +
     '<span><i style="background:var(--red)"></i>ไม่สมเหตุผล</span>' +
     '<span><i style="background:#CFC6C7"></i>รอประเมิน</span>' +
-    '<span style="color:var(--green)">✓ ยืนยันแล้ว</span></div></div>' +
+    '<span style="color:var(--green)">✓ อาจารย์แพทย์ยืนยันแล้ว</span></div></div>' +
     '<div class="reg-ctl">' +
     '<div class="fld"><label>ปี พ.ศ.</label><select data-dash="year"><option value="">ทุกปี</option>' +
       years.map(function (y) {
@@ -832,8 +898,10 @@ function viewDashboard() {
   } else {
     html += '<div class="reg-grid">' + periodCases.map(function (c) {
       var st = statusOf(c);
-      return '<button class="chip ' + statusClass(st) + '" data-case="' + esc(c.no) + '" title="เคส ' + esc(c.no) + ' · ' + statusText(st) + '">' +
-        esc(c.no) + (st !== 'pending' ? '<span class="ck">✓</span>' : '') + '</button>';
+      var byDoc = !!confOf(c);
+      var src = byDoc ? 'อาจารย์แพทย์ยืนยัน' : (st !== 'pending' ? 'ผลเบื้องต้นจาก AI' : 'ยังไม่ประเมิน');
+      return '<button class="chip ' + statusClass(st) + '" data-case="' + esc(c.no) + '" title="เคส ' + esc(c.no) + ' · ' + statusText(st) + ' · ' + src + '">' +
+        esc(c.no) + (byDoc ? '<span class="ck">✓</span>' : '') + '</button>';
     }).join('') + '</div>';
     html += '<p class="reg-hint">แตะที่หมายเลขเคสเพื่อดูบันทึกพยาบาล คำสั่งแพทย์ และผลการพิจารณาของอาจารย์แพทย์</p>';
   }
@@ -842,27 +910,35 @@ function viewDashboard() {
   /* --- KPI --- */
   html += '<div class="kpis">' +
     kpi('เคสทั้งหมด', t.total, 'ใบสั่งยาปฏิชีวนะ', '') +
-    kpi('สมเหตุผล', t.rational, 'อาจารย์แพทย์ยืนยัน', 'g') +
-    kpi('ไม่สมเหตุผล', t.irrational, 'อาจารย์แพทย์ยืนยัน', 'r') +
-    kpi('รอประเมิน', t.pending, 'ยังไม่ได้พิจารณา', '') +
+    kpi('สมเหตุผล', t.rational, 'รวมผลเบื้องต้นจาก AI', 'g') +
+    kpi('ไม่สมเหตุผล', t.irrational, 'รวมผลเบื้องต้นจาก AI', 'r') +
+    kpi('รอประเมิน', t.pending, 'ยังไม่มีผลจากใครเลย', '') +
     kpi('ร้อยละสมเหตุผล', t.done ? fmtPct(pct(t.rational, t.done)) : '—', 'Rational prescribing rate', '') +
-    kpi('ประเมินแล้ว', t.done + '<small>/' + t.total + '</small>', 'ทุกเคสต้องผ่านการยืนยัน', '') +
+    kpi('อาจารย์ยืนยันแล้ว', t.confirmed + '<small>/' + t.total + '</small>', 'ทุกเคสต้องผ่านการยืนยัน', '') +
     '</div>';
 
   /* --- ข้อบ่งชี้ + รายการยา --- */
-  var indCount = {}, drugCount = {};
+  var indAgg = {}, drugAgg = {};
   S.cases.forEach(function (c) {
-    indicationsOf(c).forEach(function (i) { indCount[i] = (indCount[i] || 0) + 1; });
-    var d = drugKey(c.drug); drugCount[d] = (drugCount[d] || 0) + 1;
+    var st = statusOf(c);
+    indicationsOf(c).forEach(function (i) { bumpAgg(indAgg, i, st); });
+    bumpAgg(drugAgg, drugKey(c.drug), st);
   });
 
+  var rateLegend = '<div class="legend">' +
+    '<span><i style="background:var(--green)"></i>สมเหตุผล</span>' +
+    '<span><i style="background:var(--red)"></i>ไม่สมเหตุผล</span>' +
+    '<span><i style="background:#E4DBDC"></i>รอประเมิน</span></div>';
+
   html += '<div class="cols2">' +
-    '<div class="card"><p class="eyebrow">ข้อมูลเหตุผลที่สั่งใช้ยา</p><h3>ข้อบ่งชี้ที่พบในเวชระเบียน</h3>' +
-    '<p class="sub">จัดกลุ่มจากบันทึกแพทย์ พยาบาล และข้อมูลหัตถการของแต่ละเคส</p>' +
-    propList(indCount, S.cases.length) + '</div>' +
-    '<div class="card"><p class="eyebrow">รายการยา</p><h3>ยาปฏิชีวนะที่ถูกสั่งใช้</h3>' +
-    '<p class="sub">นับจากข้อความคำสั่งยาในชีต</p>' +
-    propList(drugCount, S.cases.length) + '</div></div>';
+    '<div class="card"><div class="card-h"><div>' +
+      '<p class="eyebrow">ข้อมูลเหตุผลที่สั่งใช้ยา</p><h3>ข้อบ่งชี้ที่พบในเวชระเบียน</h3></div>' + rateLegend + '</div>' +
+    '<p class="sub">ร้อยละความสมเหตุผลของแต่ละข้อบ่งชี้ · คิดจากเคสที่ประเมินแล้ว</p>' +
+    rationalList(indAgg) + '</div>' +
+    '<div class="card"><div class="card-h"><div>' +
+      '<p class="eyebrow">รายการยา</p><h3>ยาปฏิชีวนะที่ถูกสั่งใช้</h3></div>' + rateLegend + '</div>' +
+    '<p class="sub">ร้อยละความสมเหตุผลของแต่ละชนิดยา · คิดจากเคสที่ประเมินแล้ว</p>' +
+    rationalList(drugAgg) + '</div></div>';
 
   /* --- สถิติรายบุคคล --- */
   var byDoc = {};
@@ -892,14 +968,14 @@ function viewDashboard() {
       '<th>แพทย์ผู้สั่ง</th><th>ใบสั่งยา</th><th>สมเหตุผล</th><th>ไม่สมเหตุผล</th><th>รอประเมิน</th><th>ร้อยละสมเหตุผล</th>' +
       '</tr></thead><tbody>' +
       docs.map(function (n) {
-        var d = byDoc[n], done = d.rational + d.irrational;
+        var d = byDoc[n];
         return '<tr><td>' + esc(doctorLabel(n)) + '</td><td>' + d.total + '</td><td>' + d.rational +
           '</td><td>' + d.irrational + '</td><td>' + d.pending + '</td><td>' +
-          (done ? fmtPct(pct(d.rational, done)) : '—') + '</td></tr>';
+          rateCell(d.rational, d.irrational, d.total) + '</td></tr>';
       }).join('') +
       '<tr class="sum"><td>รวมทั้งหมด</td><td>' + t.total + '</td><td>' + t.rational + '</td><td>' +
       t.irrational + '</td><td>' + t.pending + '</td><td>' +
-      (t.done ? fmtPct(pct(t.rational, t.done)) : '—') + '</td></tr>' +
+      rateCell(t.rational, t.irrational, t.total) + '</td></tr>' +
       '</tbody></table></div>';
   }
   html += '</div>';
@@ -911,13 +987,47 @@ function kpi(k, v, n, cls) {
     '</div><div class="n">' + esc(n) + '</div></div>';
 }
 
-function propList(map, total) {
-  var keys = Object.keys(map).sort(function (a, b) { return map[b] - map[a]; });
-  if (!keys.length || !total) return '<div class="empty">ยังไม่มีข้อมูล</div>';
+/** สะสมยอดของกลุ่มหนึ่ง ๆ ตามสถานะการประเมิน */
+function bumpAgg(agg, key, st) {
+  var g = agg[key] || (agg[key] = { total: 0, rational: 0, irrational: 0, pending: 0 });
+  g.total++; g[st]++;
+}
+
+/** แถบสองสี: เขียว = สมเหตุผล, แดง = ไม่สมเหตุผล, ส่วนที่เหลือ = รอประเมิน */
+function splitBar(rational, irrational, total, cls) {
+  var g = pct(rational, total), r = pct(irrational, total);
+  return '<div class="ptrack' + (cls ? ' ' + cls : '') + '">' +
+    (g > 0 ? '<i class="g" style="width:' + g + '%"></i>' : '') +
+    (r > 0 ? '<i class="r" style="width:' + r + '%"></i>' : '') +
+    '</div>';
+}
+
+/** ช่อง "ร้อยละสมเหตุผล" ในตารางรายบุคคล — ตัวเลขกำกับ + แถบสี */
+function rateCell(rational, irrational, total) {
+  var done = rational + irrational;
+  return '<div class="rate">' +
+    '<span class="rate-n' + (done ? (rational >= irrational ? ' g' : ' r') : '') + '">' +
+      (done ? fmtPct(pct(rational, done)) : '—') + '</span>' +
+    splitBar(rational, irrational, total, 'mini') +
+    '</div>';
+}
+
+/** รายการกลุ่ม เรียงจากกลุ่มที่พบ "ไม่สมเหตุผล" มากที่สุดก่อน */
+function rationalList(agg) {
+  var keys = Object.keys(agg).sort(function (a, b) {
+    return (agg[b].irrational - agg[a].irrational) || (agg[b].total - agg[a].total);
+  });
+  if (!keys.length) return '<div class="empty">ยังไม่มีข้อมูล</div>';
   return '<div class="plist">' + keys.map(function (k) {
-    var n = map[k], p = pct(n, total);
-    return '<div class="prow"><div class="t"><span>' + esc(k) + '</span><b>' + n + ' · ' + fmtPct(p) +
-      '</b></div><div class="ptrack"><i style="width:' + Math.max(1.5, p) + '%"></i></div></div>';
+    var g = agg[k], done = g.rational + g.irrational;
+    var right = done
+      ? '<b class="' + (g.rational >= g.irrational ? 'g' : 'r') + '">' + fmtPct(pct(g.rational, done)) +
+        '</b><span class="cnt">สมเหตุผล ' + g.rational + '/' + done + '</span>'
+      : '<span class="cnt">ยังไม่ประเมิน ' + g.total + ' เคส</span>';
+    return '<div class="prow" title="' + esc(k) + ' — ทั้งหมด ' + g.total + ' เคส · สมเหตุผล ' + g.rational +
+      ' · ไม่สมเหตุผล ' + g.irrational + ' · รอประเมิน ' + g.pending + '">' +
+      '<div class="t"><span>' + esc(k) + '</span><span class="rt">' + right + '</span></div>' +
+      splitBar(g.rational, g.irrational, g.total) + '</div>';
   }).join('') + '</div>';
 }
 
@@ -984,6 +1094,7 @@ function caseRowHTML(c) {
       '</div>' +
       '<div class="meta">' +
         '<span>ICD-10: ' + esc(c.icd10 || '—') + (c.icd10Other ? ', ' + esc(c.icd10Other) : '') + '</span>' +
+        '<span>ICD-9: ' + esc(c.icd9 || '—') + '</span>' +
         '<span>GA: ' + esc(c.week || '—') + ' สัปดาห์</span>' +
         '<span>รับเข้า: ' + esc(admit) + '</span>' +
         '<span>แพทย์: ' + esc(doctorLabel(c.doctor)) + '</span>' +
@@ -1003,7 +1114,7 @@ function confirmViewHTML(c) {
   if (!k) {
     if (canConfirm()) {
       return '<button class="cbox wait can" data-confirm-start="' + esc(c.no) + '">' +
-        '<span class="hd"><span>○ ยังไม่ยืนยัน</span><span>แตะเพื่อยืนยัน ›</span></span></button>';
+        '<span class="hd"><span>○ ยังไม่ยืนยัน</span><span>คลิกเพื่อยืนยัน ›</span></span></button>';
     }
     return '<div class="cbox wait"><span class="hd"><span>○ ยังไม่ยืนยัน</span></span></div>';
   }
@@ -1088,6 +1199,11 @@ function updateFooter() {
   if (f) f.outerHTML = viewFooter();
 }
 
+function updateFooter() {
+  var f = document.querySelector('.foot');
+  if (f) f.outerHTML = viewFooter();
+}
+
 function refreshRowStatus(c) {
   var row = document.querySelector('[data-row="' + cssEsc(String(c.no)) + '"]');
   if (row) row.className = 'crow ' + statusClass(statusOf(c));
@@ -1139,15 +1255,24 @@ function paintDetail() {
       kv('แพทย์ผู้สั่ง', esc(doctorLabel(c.doctor))) +
       kv('ยาที่สั่ง', '<span class="mono" style="font-weight:600">' + esc(c.drug || '—') + '</span>') +
     '</dl>' +
-    '<div style="margin-top:16px"><p class="eyebrow">ธงหัตถการและภาวะร่วม</p><div class="flags">' +
+    '<div style="margin-top:16px"><p class="eyebrow">หัตถการและภาวะร่วม</p><div class="flags">' +
       FLAG_LABELS.map(function (f) {
-        var on, txt = f[1];
+        var on, html2;
         if (f[0] === 'tear') {
           var tv = String(c.tear || '').trim();
           on = tv && tv !== '0';
-          txt = on ? 'แผลฝีเย็บฉีกขาดระดับ ' + tv + ' (Perineal tear)' : 'แผลฝีเย็บฉีกขาด (Perineal tear)';
-        } else on = isOn(c[f[0]]);
-        return '<span class="flag' + (on ? ' on' : '') + '">' + (on ? '● ' : '○ ') + esc(txt) + '</span>';
+          if (!on) {
+            html2 = esc('แผลฝีเย็บฉีกขาด (Perineal tear)');
+          } else {
+            html2 = esc('แผลฝีเย็บฉีกขาดระดับ ') +
+              '<b class="grade' + (isNA(tv) ? ' na' : '') + '">' + esc(isNA(tv) ? 'N/A' : tv) + '</b>' +
+              esc(' (Perineal tear)');
+          }
+        } else {
+          on = isOn(c[f[0]]);
+          html2 = esc(f[1]);
+        }
+        return '<span class="flag' + (on ? ' on' : '') + '">' + (on ? '● ' : '○ ') + html2 + '</span>';
       }).join('') +
     '</div></div></div>';
 
@@ -1315,6 +1440,7 @@ function doLogin() {
     saveSession({ token: d.token, user: d.user });
     closeModal();
     toast('เข้าสู่ระบบในชื่อ ' + (d.user.name || d.user.username));
+    aiInit();                                  // ล็อกอินแล้วเริ่มไล่ประเมินเคสที่ยังไม่มีผลทันที
     if (d.user.role === 'admin') {
       api('pendingCount', {}).then(function (r) {
         S.pendingRequests = r.pendingRequests;
@@ -1497,6 +1623,7 @@ function aiRunNext(todo, i) {
   if (S.ai.stopped || i >= todo.length) {
     S.ai.running = false; S.ai.busyNo = null;
     aiPaintBar();
+    if (S.page === 'dashboard') render();   // ทะเบียนเคสและ KPI อัปเดตครบหลังรันจบ
     return;
   }
   var c = todo[i], no = aiKey(c);
@@ -1524,6 +1651,8 @@ function aiRunNext(todo, i) {
     S.ai.busyNo = null;
     aiPaintDot(no);
     aiPaintBar();
+    refreshRowStatus(c);                 // ผล AI เปลี่ยนสถานะเคส → แถบสีข้างแถวเปลี่ยนตาม
+    renderTabs(); renderDrawer(); updateFooter();
     if (S.detailNo === no) paintDetail();
     setTimeout(function () { aiRunNext(todo, i + 1); }, 150);
   });
@@ -1624,6 +1753,7 @@ function aiDetailSummaryHTML(c) {
 function aiInit() {
   if (!S.cases.length) return;
   Promise.all([aiLoadStored(), aiCheckHealth()]).then(function () {
+    render();                       // ผล AI ที่โหลดมาเปลี่ยนสถานะเคส จึงต้องวาดหน้าใหม่ก่อน
     aiPaintBar();
     S.cases.forEach(function (c) { aiPaintDot(aiKey(c)); });
     if (S.ai.health === 'ok' && S.session && aiPending().length) aiStart(false);
