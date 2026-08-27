@@ -403,7 +403,9 @@ a{color:var(--red)}
 
 var API = '/api/rdu';
 /** ป้ายเวอร์ชัน — ใช้ตรวจว่าหน้าเว็บที่เปิดอยู่เป็นไฟล์ล่าสุดจริงหรือไม่ (แสดงท้ายหน้า) */
-var BUILD = '2026-08-27 · ai-status';
+var BUILD = '2026-08-27 · auto-refresh';
+/** ดึงข้อมูลจาก Google Sheets ซ้ำทุกกี่มิลลิวินาที (60000 = 1 นาที) */
+var REFRESH_MS = 60000;
 var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
                  'กรกฎาคม','สิงหาคม','กันยายน','ตุลาคม','พฤศจิกายน','ธันวาคม'];
 var FLAG_LABELS = [
@@ -432,6 +434,9 @@ var S = {
   users: [],
   detailNo: null,
   dash: { year: '', month: '' },
+  lastSync: null,          // เวลาที่ดึงข้อมูลจากชีตสำเร็จครั้งล่าสุด
+  syncErr: '',             // ข้อความเมื่อดึงซ้ำไม่สำเร็จ (ไม่ล้างข้อมูลเดิมทิ้ง)
+  syncing: false,
   f: { q: '', month: '', year: '', doctor: '', drug: '', result: '', confirmed: '' },
   /* ผู้ช่วยอ่าน guideline (AI) — แยกขาดจากสถานะเคส ไม่มีผลต่อ statusOf() */
   ai: {
@@ -596,6 +601,7 @@ function loadData() {
     });
     S.cases.sort(function (a, b) { return (Number(a.no) || 0) - (Number(b.no) || 0); });
     rebuildDoctorMap();                 // ดัชนีตัวกรองสร้างหลังโหลดข้อมูลเสมอ
+    S.lastSync = new Date(); S.syncErr = '';
     S.loading = false;
     render();
     aiInit();                           // โหลดผล AI ที่เคยบันทึกไว้ แล้วไล่ประเมินเคสที่ยังไม่มีผล
@@ -604,6 +610,66 @@ function loadData() {
     S.error = err.message || String(err);
     S.cases = []; S.confirmations = {};   // เชื่อมต่อไม่ได้ = ไม่แสดงเคสใด ๆ
     render();
+  });
+}
+
+/* ------------------------------------------- ดึงข้อมูลซ้ำอัตโนมัติทุก 1 นาที */
+
+/**
+ * ดึงข้อมูลใหม่แบบไม่รบกวนหน้าจอ — ไม่ขึ้นสถานะกำลังโหลด ไม่ล้างข้อมูลเดิม
+ * ถ้าดึงไม่สำเร็จจะคงข้อมูลเดิมไว้ แล้วบอกที่ท้ายหน้าว่าอัปเดตล่าสุดเมื่อไหร่
+ */
+function quietReload() {
+  if (S.syncing) return Promise.resolve();
+  S.syncing = true;
+  var before = S.cases.length;
+
+  return api('bootstrap', { token: '' }).then(function (d) {
+    S.cases = (d.cases || []).slice();
+    S.confirmations = {};
+    (d.confirmations || []).forEach(function (r) {
+      var k = String(r.case_no || '').trim();
+      if (k) S.confirmations[k] = r;
+    });
+    S.cases.sort(function (a, b) { return (Number(a.no) || 0) - (Number(b.no) || 0); });
+    rebuildDoctorMap();
+    S.lastSync = new Date(); S.syncErr = ''; S.error = null;
+    return aiLoadStored();                    // ดึงผล AI ล่าสุดจากชีตด้วย
+  }).then(function () {
+    var y = window.scrollY;
+    render();
+    aiPaintBar();
+    S.cases.forEach(function (c) { aiPaintDot(aiKey(c)); });
+    window.scrollTo(0, y);
+    if (S.cases.length > before) toast('มีเคสใหม่ ' + (S.cases.length - before) + ' เคส');
+    // มีเคสใหม่ที่ยังไม่มีผล AI → ให้ไล่ประเมินต่อทันที
+    if (S.ai.health === 'ok' && S.session && !S.ai.running && aiPending().length) aiStart(false);
+  }).catch(function (err) {
+    S.syncErr = err.message || String(err);   // เก็บข้อมูลเดิมไว้ ไม่ล้างหน้าจอ
+    updateFooter();
+  }).then(function () { S.syncing = false; });
+}
+
+/** ข้ามการดึงซ้ำเมื่อจังหวะไม่เหมาะ เพื่อไม่ให้สิ่งที่ผู้ใช้กำลังทำค้างอยู่หาย */
+function canAutoRefresh() {
+  if (document.hidden) return false;                      // ไม่ได้ดูแท็บนี้อยู่
+  if (S.syncing || S.loading) return false;
+  if (S.ai.running) return false;                         // AI กำลังไล่ประเมิน
+  if ($('modal').classList.contains('on')) return false;  // กล่องเข้าสู่ระบบ/สมัครเปิดอยู่
+  if (document.querySelector('.cform')) return false;     // กำลังพิมพ์เหตุผลยืนยันค้างอยู่
+  if (S.page === 'users') return false;                   // หน้าจัดการผู้ใช้มีตัวโหลดของตัวเอง
+  return true;
+}
+
+function startAutoRefresh() {
+  clearInterval(startAutoRefresh._t);
+  startAutoRefresh._t = setInterval(function () {
+    if (canAutoRefresh()) quietReload();
+  }, REFRESH_MS);
+
+  // กลับมาที่แท็บนี้เมื่อไหร่ ดึงใหม่ทันทีโดยไม่ต้องรอครบนาที
+  document.addEventListener('visibilitychange', function () {
+    if (!document.hidden && canAutoRefresh()) quietReload();
   });
 }
 
@@ -819,7 +885,16 @@ function viewFooter() {
   return '<div class="foot">ข้อมูลเคสทั้งหมดอ่านจาก Google Sheets โดยตรงทุกครั้งที่เปิดหน้า ' +
     '· ผลเบื้องต้นประเมินโดยระบบตามแนวทางที่นำเข้าไว้ อาจารย์แพทย์ยืนยันทับได้ทุกเคส และผลของอาจารย์แพทย์ถือเป็นที่สุด ' +
     '· อาจารย์แพทย์ยืนยันแล้ว ' + t.confirmed + ' จาก ' + t.total + ' เคส' +
-    '<span class="build">เวอร์ชันหน้าเว็บ ' + esc(BUILD) + '</span></div>';
+    '<span class="build">' + syncLine() + ' · เวอร์ชันหน้าเว็บ ' + esc(BUILD) + '</span></div>';
+}
+
+/** บรรทัดบอกสถานะการดึงข้อมูลอัตโนมัติ */
+function syncLine() {
+  if (!S.lastSync) return 'ยังไม่ได้ดึงข้อมูล';
+  var t = S.lastSync;
+  var hh = ('0' + t.getHours()).slice(-2), mm = ('0' + t.getMinutes()).slice(-2);
+  var base = 'ดึงข้อมูลจากชีตอัตโนมัติทุก 1 นาที · ล่าสุด ' + hh + ':' + mm + ' น.';
+  return S.syncErr ? base + ' · ดึงรอบล่าสุดไม่สำเร็จ (' + esc(S.syncErr) + ') กำลังลองใหม่' : base;
 }
 
 function errorBox() {
@@ -1903,6 +1978,7 @@ restoreSession().then(function () {
   startPendingWatch();
   return loadData();
 }).then(function () {
+  startAutoRefresh();                 // ดึงข้อมูลจากชีตซ้ำทุก 1 นาที
   if (isAdmin()) {
     api('pendingCount', {}).then(function (d) {
       S.pendingRequests = d.pendingRequests;
