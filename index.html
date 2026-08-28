@@ -314,6 +314,75 @@ a{color:var(--red)}
 .badge.ok{border-color:var(--green);color:var(--green)}
 .badge.no{border-color:var(--red);color:var(--red)}
 
+/* ราคายา */
+.kpis.k5{grid-template-columns:repeat(5,1fr)}
+.rulebar{display:flex;border:1px solid var(--line);border-left:3px solid var(--green);
+  background:#F1F6F4;border-radius:var(--r);padding:12px 15px;margin-bottom:18px;font-size:13.5px;line-height:1.6}
+.rulebar b{color:var(--green)}
+.warnbox{border:1px solid var(--orange);border-left:3px solid var(--orange);background:#FDF4EC;
+  border-radius:var(--r);padding:12px 15px;margin-top:14px;font-size:13.5px;line-height:1.6;color:#7A3F0E}
+.warnbox b{display:block;margin-bottom:3px}
+.warnbox ul{margin:6px 0 0;padding-left:20px}
+.warnbox button{color:inherit;text-decoration:underline;text-underline-offset:2px;font:inherit}
+.dtool{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px}
+.dtool input[type=search]{flex:1;min-width:190px;border:1px solid var(--line-2);border-radius:var(--r);
+  padding:9px 11px;background:#fff;font-size:14px}
+.dseg{display:flex;border:1px solid var(--line-2);border-radius:var(--r);overflow:hidden;background:#fff}
+.dseg button{padding:9px 14px;font-size:13.5px;color:var(--muted);border-right:1px solid var(--line-2)}
+.dseg button:last-child{border-right:none}
+.dseg button.on{background:var(--red-l);color:var(--red);font-weight:600}
+.dbtn{border:1px solid var(--red);color:var(--red);background:#fff;border-radius:var(--r);
+  padding:9px 16px;font-size:13.5px}
+.dbtn:hover{background:var(--red-l)}
+.dbtn.solid{background:var(--red);color:#fff}
+.dbtn.solid:hover{background:var(--red-d)}
+.dbtn.ghost{border-color:var(--line-2);color:var(--muted)}
+.dbtn.ghost:hover{background:#F6F1F1}
+.dbtn[disabled]{opacity:.45;cursor:not-allowed}
+.dtbl td{vertical-align:middle}
+.dtbl tr.off td{color:var(--muted)}
+.dtbl tr.off td:first-child{text-decoration:line-through;text-decoration-color:var(--line-2)}
+.dgen{font-weight:600}
+.dtag{display:inline-block;font-family:var(--mono);font-size:11px;border:1px solid var(--line-2);
+  border-radius:2px;padding:1px 6px;color:var(--muted);background:#FBF8F8}
+.dstate{display:inline-flex;align-items:center;gap:5px;font-size:12.5px;white-space:nowrap}
+.dstate i{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
+.dstate.on{color:var(--green)} .dstate.on i{background:var(--green)}
+.dstate.off{color:var(--muted)} .dstate.off i{background:var(--line-2)}
+.rowbtn{font-size:12.5px;color:var(--red);padding:4px 8px;border-radius:2px}
+.rowbtn:hover{background:var(--red-l)}
+.rowbtn.mute{color:var(--muted)}
+.rowbtn.mute:hover{background:#F1EBEB}
+.dform{display:flex;flex-direction:column;gap:14px}
+.dform .fld{display:flex;flex-direction:column;gap:5px}
+.dform .fld label{font-size:12.5px;color:var(--muted)}
+.dform .fld input,.dform .fld select{border:1px solid var(--line-2);border-radius:var(--r);
+  padding:10px 11px;background:#fff;font-size:14.5px;width:100%}
+.dform .hint{font-size:12px;color:var(--muted);line-height:1.5}
+.dform .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dsw{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:var(--r);
+  padding:11px 13px;background:#fff;width:100%;text-align:left}
+.dsw .t{width:38px;height:21px;border-radius:999px;background:#DFD6D7;position:relative;flex:none;transition:background .15s}
+.dsw .t::after{content:'';position:absolute;top:2px;left:2px;width:17px;height:17px;border-radius:50%;
+  background:#fff;transition:transform .15s;box-shadow:0 1px 2px rgba(0,0,0,.2)}
+.dsw.on .t{background:var(--green)}
+.dsw.on .t::after{transform:translateX(17px)}
+.dsw .lb{font-size:14px}
+.dsw .lb small{display:block;color:var(--muted);font-size:12px;font-weight:400}
+.dprev{border:1px solid var(--line);border-left:3px solid var(--green);background:#F1F6F4;
+  border-radius:var(--r);padding:13px 15px}
+.dprev .big{font-family:var(--mono);font-size:22px;font-weight:600;color:var(--green);margin-top:3px}
+.dprev p{margin:7px 0 0;font-size:12.5px;color:var(--muted);line-height:1.55}
+.dfoot{display:flex;gap:10px;align-items:center;margin-top:18px;padding-top:16px;border-top:1px solid var(--line)}
+.dfoot .dbtn{flex:1}
+.ddel{color:var(--red);font-size:13px;padding:8px 10px;border-radius:2px;margin-left:auto;flex:none}
+.ddel:hover{background:var(--red-l)}
+.derr{color:var(--red);font-size:13px;min-height:1.2em}
+@media (max-width:900px){
+  .kpis.k5{grid-template-columns:1fr 1fr}
+  .kpis.k5 .kpi{border-bottom:1px solid var(--line)}
+}
+
 /* footer */
 .foot{border-top:1px solid var(--line);margin-top:34px;padding-top:16px;font-size:12.5px;color:var(--muted)}
 .foot code{font-family:var(--mono)}
@@ -403,7 +472,7 @@ a{color:var(--red)}
 
 var API = '/api/rdu';
 /** ป้ายเวอร์ชัน — ใช้ตรวจว่าหน้าเว็บที่เปิดอยู่เป็นไฟล์ล่าสุดจริงหรือไม่ (แสดงท้ายหน้า) */
-var BUILD = '2026-08-27 · ai-no-login';
+var BUILD = '2026-08-28 · drug-price';
 /** ดึงข้อมูลจาก Google Sheets ซ้ำทุกกี่มิลลิวินาที (60000 = 1 นาที) */
 var REFRESH_MS = 60000;
 var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -434,6 +503,12 @@ var S = {
   users: [],
   detailNo: null,
   dash: { year: '', month: '' },
+  /* ราคายา — อ่านจากแท็บ Drugs ในชีตเดียวกัน */
+  drugs: [],
+  dq: '',                  // คำค้นในหน้าราคายา
+  df: 'all',               // ตัวกรอง: all | on | off
+  soMode: 'case',          // แถบด้านข้างกำลังแสดงอะไร: case | drug
+  drugEdit: null,          // แถวยาที่กำลังแก้ (null = เพิ่มใหม่)
   lastSync: null,          // เวลาที่ดึงข้อมูลจากชีตสำเร็จครั้งล่าสุด
   syncErr: '',             // ข้อความเมื่อดึงซ้ำไม่สำเร็จ (ไม่ล้างข้อมูลเดิมทิ้ง)
   syncing: false,
@@ -518,6 +593,141 @@ function indicationsOf(c) {
   return out;
 }
 
+/* ------------------------------------------------ ราคายาและมูลค่าที่เลี่ยงได้ */
+
+var DRUG_FORMS = ['CAP','CAPS','CAPSULE','TAB','TABS','TABLET','INJ','INJECTION','SYR','SYRUP',
+                  'SUSP','SOLN','SOL','VIAL','AMP','AMPULE','SUPP','CREAM','OINT','GEL','DROP','POWDER'];
+var UNIT_OPTIONS = ['เม็ด','แคปซูล','ขวด','หลอด','ซอง','ampule','vial','ml'];
+
+function normKey(s) { return String(s || '').toUpperCase().replace(/[\s.\-_]/g, ''); }
+function normForm(f) {
+  var s = String(f || '').toUpperCase().replace(/[^A-Z]/g, '');
+  if (!s) return '';
+  if (s.indexOf('CAP') === 0) return 'CAP';
+  if (s.indexOf('TAB') === 0) return 'TAB';
+  if (s.indexOf('INJ') === 0 || s.indexOf('VIAL') === 0 || s.indexOf('AMP') === 0) return 'INJ';
+  if (s.indexOf('SYR') === 0 || s.indexOf('SUSP') === 0 || s.indexOf('SOL') === 0) return 'SYR';
+  return s;
+}
+function normStrength(s) {
+  return String(s || '').toUpperCase().replace(/\s+/g, '').replace(/GRAM(S)?$/, 'G').replace(/GM$/, 'G');
+}
+
+/** แยกข้อความคำสั่งยา — ตรรกะเดียวกับฝั่ง Apps Script เป๊ะ ๆ */
+function parseDrugText(text) {
+  var s = String(text || '').trim();
+  var out = { generic: '', form: '', strength: '', qty: 0, raw: s };
+  if (!s) return out;
+  var q = s.match(/\((\d+(?:\.\d+)?)\)[^()]*$/);
+  if (q) out.qty = Number(q[1]);
+  var m = s.match(/(\d+(?:\.\d+)?)\s*(MCG|MG|GM|G|ML|IU|MU|%)\b/i);
+  if (m) out.strength = m[1] + ' ' + m[2].toUpperCase();
+  var parts = s.split(/\s+/), i, w, wu, g = [];
+  for (i = 0; i < parts.length; i++) {
+    wu = parts[i].replace(/[.,;:]+$/, '').toUpperCase();
+    if (DRUG_FORMS.indexOf(wu) >= 0) { out.form = wu; break; }
+  }
+  for (i = 0; i < parts.length; i++) {
+    w = parts[i]; wu = w.replace(/[.,;:]+$/, '').toUpperCase();
+    if (/\d/.test(w) || DRUG_FORMS.indexOf(wu) >= 0 || w.charAt(0) === '(') break;
+    g.push(wu);
+  }
+  out.generic = g.join(' ').replace(/[.,;:]+$/, '');
+  return out;
+}
+
+function findDrugRow(p) {
+  var gen = normKey(p.generic);
+  if (!gen) return null;
+  var cand = S.drugs.filter(function (d) { return isOn(d.active) && normKey(d.generic) === gen; });
+  if (!cand.length) return null;
+  if (p.form) {
+    var f = normForm(p.form);
+    var bf = cand.filter(function (d) { return normForm(d.form) === f; });
+    if (bf.length) cand = bf;
+  }
+  if (p.strength) {
+    var st = normStrength(p.strength);
+    var bs = cand.filter(function (d) { return normStrength(d.strength) === st; });
+    if (bs.length) cand = bs;
+  }
+  if (cand.length > 1) {
+    cand = cand.slice().sort(function (a, b) {
+      return String(b.effective_from || '').localeCompare(String(a.effective_from || ''));
+    });
+  }
+  return cand[0] || null;
+}
+
+/** ค่ายาของเคสตามราคา "ปัจจุบัน" ในตาราง Drugs (ใช้เป็นตัวหารและตัวประมาณการเท่านั้น) */
+function priceNow(c) {
+  var p = parseDrugText(c.drug);
+  if (!p.generic) return { matched: false, parsed: p, reason: 'อ่านชื่อยาจากคำสั่งยาไม่ได้' };
+  var row = findDrugRow(p);
+  if (!row) return { matched: false, parsed: p, reason: 'ยังไม่มีราคาของ ' + p.generic + ' ในตารางราคายา' };
+  var price = Number(String(row.price_per_unit || '').replace(/,/g, ''));
+  if (!(price >= 0)) return { matched: false, parsed: p, reason: 'ราคาของ ' + p.generic + ' ไม่ใช่ตัวเลข' };
+  if (!(p.qty > 0)) return { matched: false, parsed: p, price: price, reason: 'คำสั่งยาไม่มีจำนวนที่จ่ายในวงเล็บ' };
+  return { matched: true, parsed: p, drug: row, price: price, qty: p.qty,
+           amount: Math.round(price * p.qty * 100) / 100 };
+}
+
+/**
+ * มูลค่าที่เลี่ยงได้ของเคสหนึ่ง = ค่ายาที่ "ล็อกไว้" ตอนอาจารย์แพทย์ยืนยันว่าไม่สมเหตุผล
+ * ผลของ AI ไม่นับเป็นเงิน และการแก้ราคาในตารางภายหลังไม่ทำให้ตัวเลขนี้เปลี่ยน
+ */
+function savedAmount(c) {
+  var k = confOf(c);
+  if (!k || k.status !== 'irrational') return 0;
+  var n = Number(String(k.amount || '').replace(/,/g, ''));
+  return n > 0 ? n : 0;
+}
+
+function baht(n) {
+  return Number(n || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+/** สรุปตัวเลขทั้งหมดของหน้าราคายา จากเคสชุดที่ส่งเข้ามา */
+function priceSummary(list) {
+  var out = {
+    saved: 0, savedCases: 0,          // ยืนยันว่าไม่สมเหตุผล + จับคู่ราคาได้
+    unmatched: [],                    // ยืนยันว่าไม่สมเหตุผล แต่จับคู่ราคาไม่ได้
+    pendingAmt: 0, pendingCases: 0,   // AI ว่าไม่สมเหตุผล แต่ยังไม่มีใครยืนยัน
+    totalAmt: 0, totalCases: 0,       // ค่ายารวมทุกเคสตามราคาปัจจุบัน (ตัวหาร)
+    byDrug: {}
+  };
+  list.forEach(function (c) {
+    var live = priceNow(c);
+    var k = confOf(c);
+    var locked = savedAmount(c);
+
+    /* ตัวหาร = ค่ายารวมทุกเคสที่คิดราคาได้
+       เคสที่ยืนยันแล้วใช้ราคาที่ล็อกไว้ เคสอื่นใช้ราคาปัจจุบัน
+       ทำแบบนี้ตัวเศษจึงเป็นส่วนหนึ่งของตัวหารเสมอ สัดส่วนไม่มีวันเกิน 100% */
+    if (locked > 0) { out.totalAmt += locked; out.totalCases++; }
+    else if (live.matched) { out.totalAmt += live.amount; out.totalCases++; }
+
+    if (k && k.status === 'irrational') {
+      var amt = locked;
+      if (amt > 0) {
+        out.saved += amt; out.savedCases++;
+        var key = live.parsed.generic || '(ไม่ทราบชื่อยา)';
+        var g = out.byDrug[key] || (out.byDrug[key] = { cases: 0, amount: 0 });
+        g.cases++; g.amount += amt;
+      } else {
+        out.unmatched.push({ c: c, reason: live.reason || 'จับคู่ราคาไม่ได้' });
+      }
+    } else if (!k && aiStatusOf(c) === 'irrational') {
+      out.pendingCases++;
+      if (live.matched) out.pendingAmt += live.amount;
+    }
+  });
+  out.saved = Math.round(out.saved * 100) / 100;
+  out.pendingAmt = Math.round(out.pendingAmt * 100) / 100;
+  out.totalAmt = Math.round(out.totalAmt * 100) / 100;
+  return out;
+}
+
 function confOf(c) { return S.confirmations[String(c.no).trim()] || null; }
 
 /** ผล AI แปลงเป็นสถานะเคส — insufficient_data ไม่นับ ให้คงเป็นรอประเมิน */
@@ -594,6 +804,7 @@ function loadData() {
   S.loading = true; S.error = null; render();
   return api('bootstrap', { token: '' }).then(function (d) {
     S.cases = (d.cases || []).slice();
+    S.drugs = (d.drugs || []).slice();
     S.confirmations = {};
     (d.confirmations || []).forEach(function (r) {
       var k = String(r.case_no || '').trim();
@@ -626,6 +837,7 @@ function quietReload() {
 
   return api('bootstrap', { token: '' }).then(function (d) {
     S.cases = (d.cases || []).slice();
+    S.drugs = (d.drugs || []).slice();
     S.confirmations = {};
     (d.confirmations || []).forEach(function (r) {
       var k = String(r.case_no || '').trim();
@@ -656,6 +868,7 @@ function canAutoRefresh() {
   if (S.syncing || S.loading) return false;
   if ($('modal').classList.contains('on')) return false;  // กล่องเข้าสู่ระบบ/สมัครเปิดอยู่
   if (S.page === 'users') return false;                   // หน้าจัดการผู้ใช้มีตัวโหลดของตัวเอง
+  if (S.soMode === 'drug') return false;                  // กำลังกรอกฟอร์มราคายาอยู่
 
   // AI กำลังไล่ประเมิน — กันไว้ไม่เกิน 3 นาที เผื่อบริการ AI ค้างแล้วบล็อกถาวร
   if (S.ai.running && (Date.now() - (S.ai.startedAt || 0)) < 180000) return false;
@@ -811,6 +1024,7 @@ function render() {
   renderDrawer();
   var main = $('main');
   if (S.page === 'cases') main.innerHTML = viewCases();
+  else if (S.page === 'drugs') main.innerHTML = viewDrugs();
   else if (S.page === 'users') main.innerHTML = viewUsers();
   else main.innerHTML = viewDashboard();
   main.insertAdjacentHTML('beforeend', viewFooter());
@@ -836,7 +1050,8 @@ function navItems() {
   var pending = S.cases.filter(function (c) { return statusOf(c) === 'pending'; }).length;
   var items = [
     { id: 'dashboard', label: 'แดชบอร์ด',  group: 'ภาพรวม',   badge: 0 },
-    { id: 'cases',     label: 'เคสทั้งหมด', group: 'ข้อมูลเคส', badge: pending }
+    { id: 'cases',     label: 'เคสทั้งหมด', group: 'ข้อมูลเคส', badge: pending },
+    { id: 'drugs',     label: 'ราคายา',     group: 'ข้อมูลเคส', badge: 0 }
     /* ── เพิ่มเมนูใหม่ตรงนี้ ── */
   ];
   if (isAdmin()) {
@@ -1114,6 +1329,293 @@ function rationalList(agg) {
   }).join('') + '</div>';
 }
 
+/* =========================================================== render: drugs */
+
+function canEditDrugs() { return canConfirm(); }   // อาจารย์แพทย์และผู้ดูแลระบบ
+
+function visibleDrugs() {
+  var q = String(S.dq || '').trim().toUpperCase();
+  return S.drugs.filter(function (d) {
+    var on = isOn(d.active);
+    if (S.df === 'on' && !on) return false;
+    if (S.df === 'off' && on) return false;
+    if (q && (String(d.generic) + ' ' + String(d.form) + ' ' + String(d.strength)).toUpperCase().indexOf(q) < 0) return false;
+    return true;
+  });
+}
+
+function viewDrugs() {
+  if (S.loading) return errorBox() + '<div class="card"><div class="empty">กำลังโหลดข้อมูลจาก Google Sheets…</div></div>';
+
+  var sum = priceSummary(S.cases);
+  var html = errorBox();
+
+  /* --- ตัวเลขสรุป --- */
+  html += '<div class="kpis k5">' +
+    kpi('รายการยาในระบบ', S.drugs.length,
+        'ใช้งานอยู่ ' + S.drugs.filter(function (d) { return isOn(d.active); }).length + ' รายการ', '') +
+    kpi('มูลค่าที่เลี่ยงได้', baht(sum.saved) + '<small> ฿</small>',
+        'จาก ' + sum.savedCases + ' เคสที่ยืนยันแล้ว', 'g') +
+    kpi('คิดเป็นสัดส่วน', sum.totalAmt > 0 ? fmtPct(pct(sum.saved, sum.totalAmt)) : '—',
+        'ของค่ายารวม ' + baht(sum.totalAmt) + ' ฿', '') +
+    kpi('รอการยืนยัน', sum.pendingCases,
+        'AI ว่าไม่สมเหตุผล · ' + baht(sum.pendingAmt) + ' ฿', '') +
+    kpi('จับคู่ราคาไม่ได้', sum.unmatched.length, 'เคสที่ยืนยันแล้วแต่ไม่มีราคา', '') +
+    '</div>';
+
+  html += '<div class="rulebar"><span><b>นับเฉพาะเคสที่อาจารย์แพทย์ยืนยันว่าไม่สมเหตุผลเท่านั้น</b> — ' +
+    'เคสที่ AI ประเมินไว้แต่ยังไม่มีคนยืนยันจะอยู่ในช่อง “รอการยืนยัน” และยังไม่ถูกนับเป็นเงิน ' +
+    'ราคาถูกล็อกไว้ตั้งแต่วินาทีที่กดยืนยัน การแก้ราคาในตารางข้างล่างจึงไม่ทำให้ตัวเลขย้อนหลังเปลี่ยน</span></div>';
+
+  /* --- เคสที่จับคู่ราคาไม่ได้ --- */
+  if (sum.unmatched.length) {
+    html += '<div class="card"><p class="eyebrow">ต้องแก้ไข</p><h3>เคสที่ยืนยันว่าไม่สมเหตุผลแต่คิดเงินไม่ได้</h3>' +
+      '<p class="sub">ตัวเลขมูลค่าที่เลี่ยงได้ยังไม่ครบจนกว่าจะแก้รายการเหล่านี้</p>' +
+      '<div class="warnbox"><ul>' +
+      sum.unmatched.slice(0, 12).map(function (x) {
+        return '<li><button data-open="' + esc(x.c.no) + '">เคส ' + esc(x.c.no) + '</button> · ' +
+          '<span class="mono">' + esc(x.c.drug || '(ไม่ระบุยา)') + '</span> — ' + esc(x.reason) + '</li>';
+      }).join('') +
+      (sum.unmatched.length > 12 ? '<li>และอีก ' + (sum.unmatched.length - 12) + ' เคส</li>' : '') +
+      '</ul></div></div>';
+  }
+
+  /* --- ตารางราคายา --- */
+  html += '<div class="card"><div class="card-h"><div>' +
+    '<p class="eyebrow">ตาราง DRUGS</p><h3>รายการยาและราคาต่อหน่วย</h3>' +
+    '<p class="sub">' + (canEditDrugs()
+      ? 'แก้ที่นี่หรือแก้ในแท็บ Drugs ของชีตโดยตรงก็ได้ ผลออกมาเหมือนกัน'
+      : 'เข้าสู่ระบบด้วยบัญชีอาจารย์แพทย์หรือผู้ดูแลระบบจึงจะแก้ไขได้') + '</p></div></div>';
+
+  html += '<div class="dtool">' +
+    '<input type="search" data-dq placeholder="ค้นหาชื่อสามัญ เช่น CEFAZOLIN" value="' + esc(S.dq) + '" aria-label="ค้นหายา">' +
+    '<div class="dseg">' +
+      ['all,ทั้งหมด', 'on,ใช้งาน', 'off,ปิดใช้งาน'].map(function (o) {
+        var b = o.split(',');
+        return '<button data-df="' + b[0] + '"' + (S.df === b[0] ? ' class="on"' : '') + '>' + b[1] + '</button>';
+      }).join('') +
+    '</div>' +
+    (canEditDrugs() ? '<button class="dbtn solid" data-act="drugNew">+ เพิ่มรายการยา</button>' : '') +
+    (isAdmin() ? '<button class="dbtn ghost" data-act="recalc">คำนวณราคาใหม่</button>' : '') +
+    '</div>';
+
+  var list = visibleDrugs();
+  if (!S.drugs.length) {
+    html += '<div class="empty">ยังไม่มีรายการยาในแท็บ Drugs ของชีต' +
+      (canEditDrugs() ? ' — กด “เพิ่มรายการยา” เพื่อเริ่มต้น' : '') + '</div>';
+  } else if (!list.length) {
+    html += '<div class="empty">ไม่พบรายการยาที่ค้นหา</div>';
+  } else {
+    html += '<div class="tbl-wrap"><table class="tbl dtbl"><thead><tr>' +
+      '<th>ชื่อสามัญ</th><th>รูปแบบ</th><th>ขนาด</th><th>หน่วยนับ</th>' +
+      '<th>ราคา/หน่วย (฿)</th><th>เริ่มใช้ราคานี้</th><th>สถานะ</th>' +
+      (canEditDrugs() ? '<th></th>' : '') + '</tr></thead><tbody>' +
+      list.map(function (d) {
+        var on = isOn(d.active);
+        return '<tr' + (on ? '' : ' class="off"') + '>' +
+          '<td><span class="dgen">' + esc(d.generic) + '</span></td>' +
+          '<td>' + (d.form ? '<span class="dtag">' + esc(d.form) + '</span>' : '—') + '</td>' +
+          '<td class="mono">' + esc(d.strength || '—') + '</td>' +
+          '<td>' + esc(d.unit || '—') + '</td>' +
+          '<td class="mono"><b>' + esc(d.price_per_unit || '—') + '</b></td>' +
+          '<td class="mono">' + esc(d.effective_from || '—') + '</td>' +
+          '<td><span class="dstate ' + (on ? 'on' : 'off') + '"><i></i>' + (on ? 'ใช้งาน' : 'ปิดใช้งาน') + '</span></td>' +
+          (canEditDrugs()
+            ? '<td style="white-space:nowrap"><button class="rowbtn" data-drug-edit="' + esc(d._row) + '">แก้ไข</button>' +
+              '<button class="rowbtn mute" data-drug-del="' + esc(d._row) + '">ลบ</button></td>'
+            : '') +
+          '</tr>';
+      }).join('') + '</tbody></table></div>';
+  }
+  html += '</div>';
+
+  /* --- แยกตามชนิดยา --- */
+  var keys = Object.keys(sum.byDrug).sort(function (a, b) { return sum.byDrug[b].amount - sum.byDrug[a].amount; });
+  html += '<div class="card"><div class="card-h"><div>' +
+    '<p class="eyebrow">มูลค่าที่เลี่ยงได้</p><h3>แยกตามชนิดยา</h3>' +
+    '<p class="sub">เฉพาะเคสที่อาจารย์แพทย์ยืนยันว่าไม่สมเหตุผล · ใช้ราคาที่ล็อกไว้ตอนยืนยัน</p></div></div>';
+  if (!keys.length) {
+    html += '<div class="empty">ยังไม่มีเคสที่อาจารย์แพทย์ยืนยันว่าไม่สมเหตุผลและจับคู่ราคาได้</div>';
+  } else {
+    var top = sum.byDrug[keys[0]].amount || 1;
+    html += '<div class="plist">' + keys.map(function (k) {
+      var g = sum.byDrug[k];
+      return '<div class="prow"><div class="t"><span>' + esc(k) + '</span>' +
+        '<span class="rt"><b class="g">' + baht(g.amount) + ' ฿</b>' +
+        '<span class="cnt">' + g.cases + ' เคส</span></span></div>' +
+        '<div class="ptrack"><i class="g" style="width:' + (g.amount * 100 / top) + '%"></i></div></div>';
+    }).join('') + '</div>';
+  }
+  html += '</div>';
+
+  return html;
+}
+
+/* ---------------------------------------- แถบด้านข้าง: ฟอร์มเพิ่ม/แก้รายการยา */
+
+function openDrugForm(row) {
+  S.soMode = 'drug';
+  S.detailNo = null;
+  S.drugEdit = row ? (S.drugs.filter(function (d) { return String(d._row) === String(row); })[0] || null) : null;
+  var d = S.drugEdit;
+
+  $('soTitle').textContent = d ? 'แก้ไข ' + (d.generic || 'รายการยา') : 'เพิ่มรายการยา';
+  $('soBody').innerHTML =
+    '<div class="dform">' +
+      '<div class="fld"><label for="dgGen">ชื่อสามัญ (generic)</label>' +
+        '<input id="dgGen" class="mono" placeholder="CEFAZOLIN" value="' + esc(d ? d.generic : '') + '">' +
+        '<span class="hint">พิมพ์เป็นภาษาอังกฤษตัวพิมพ์ใหญ่ให้ตรงกับที่ปรากฏในคำสั่งยา</span></div>' +
+      '<div class="two">' +
+        '<div class="fld"><label for="dgForm">รูปแบบยา</label>' +
+          '<select id="dgForm">' + ['', 'CAP', 'TAB', 'INJ', 'SYR', 'SUPP', 'CREAM'].map(function (f) {
+            return '<option value="' + f + '"' + (d && String(d.form).toUpperCase() === f ? ' selected' : '') +
+              '>' + (f || '— ไม่ระบุ —') + '</option>';
+          }).join('') + '</select></div>' +
+        '<div class="fld"><label for="dgStr">ขนาด</label>' +
+          '<input id="dgStr" class="mono" placeholder="1 GM" value="' + esc(d ? d.strength : '') + '"></div>' +
+      '</div>' +
+      '<div class="two">' +
+        '<div class="fld"><label for="dgUnit">หน่วยนับ</label>' +
+          '<select id="dgUnit">' + UNIT_OPTIONS.map(function (u) {
+            return '<option value="' + esc(u) + '"' + (d && d.unit === u ? ' selected' : '') + '>' + esc(u) + '</option>';
+          }).join('') + '</select></div>' +
+        '<div class="fld"><label for="dgPrice">ราคาต่อหน่วย (บาท)</label>' +
+          '<input id="dgPrice" class="mono" inputmode="decimal" placeholder="28.00" value="' +
+            esc(d ? d.price_per_unit : '') + '"></div>' +
+      '</div>' +
+      '<div class="fld"><label for="dgFrom">เริ่มใช้ราคานี้ตั้งแต่</label>' +
+        '<input id="dgFrom" class="mono" placeholder="2569-04-01" value="' + esc(d ? d.effective_from : '') + '">' +
+        '<span class="hint">ราคาเปลี่ยนอย่าลบแถวเดิม — ปิดใช้งานแถวเดิมแล้วเพิ่มแถวใหม่ ' +
+        'ตัวเลขย้อนหลังถูกล็อกไว้แล้วจึงไม่กระทบอยู่ดี แต่จะย้อนดูได้ว่าเคยคิดราคาเท่าไหร่</span></div>' +
+      '<button class="dsw' + (!d || isOn(d.active) ? ' on' : '') + '" id="dgActive" ' +
+        'aria-pressed="' + (!d || isOn(d.active) ? 'true' : 'false') + '">' +
+        '<span class="t"></span><span class="lb">ใช้งานราคานี้' +
+        '<small>เฉพาะแถวที่ใช้งานอยู่เท่านั้นที่ถูกนำไปคิดเงิน</small></span></button>' +
+      '<div class="dprev"><p class="eyebrow">ผลต่อการคำนวณ</p>' +
+        '<div class="big" id="dgPvAmt">—</div><p id="dgPvTxt"></p></div>' +
+      '<div class="derr" id="dgErr"></div>' +
+      '<div class="dfoot">' +
+        '<button class="dbtn solid" id="dgSave">บันทึกลงชีต</button>' +
+        '<button class="dbtn ghost" id="dgCancel">ยกเลิก</button>' +
+        (d ? '<button class="ddel" id="dgDel">ลบรายการนี้</button>' : '') +
+      '</div>' +
+    '</div>';
+
+  $('so').classList.add('on');
+  $('scrim').classList.add('on');
+  bindDrugForm();
+  $('dgGen').focus();          // โฟกัสทันที ไม่หน่วงเวลา กันไม่ให้เคอร์เซอร์กระโดดถ้าผู้ใช้พิมพ์ช่องอื่นก่อน
+}
+
+function bindDrugForm() {
+  var act = $('dgActive');
+  act.addEventListener('click', function () {
+    var on = !act.classList.contains('on');
+    act.classList.toggle('on', on);
+    act.setAttribute('aria-pressed', on ? 'true' : 'false');
+  });
+  ['dgGen', 'dgForm', 'dgStr', 'dgPrice', 'dgUnit'].forEach(function (id) {
+    $(id).addEventListener('input', drugPreview);
+    $(id).addEventListener('change', drugPreview);
+  });
+  $('dgCancel').addEventListener('click', closeDetail);
+  $('dgSave').addEventListener('click', saveDrug);
+  if ($('dgDel')) $('dgDel').addEventListener('click', deleteDrug);
+  drugPreview();
+}
+
+/** บอกล่วงหน้าว่าราคาที่กำลังกรอกจะมีผลกับเคสไหนบ้าง (เฉพาะเคสที่ยังไม่ถูกยืนยัน) */
+function drugPreview() {
+  var gen = normKey($('dgGen').value);
+  var price = Number(String($('dgPrice').value).replace(/,/g, ''));
+  var form = normForm($('dgForm').value);
+  var str = normStrength($('dgStr').value);
+  var amt = $('dgPvAmt'), txt = $('dgPvTxt');
+
+  if (!gen || !(price >= 0)) {
+    amt.textContent = '—';
+    txt.textContent = 'กรอกชื่อสามัญและราคาต่อหน่วยเพื่อดูว่าราคานี้จะมีผลกับเคสไหนบ้าง';
+    return;
+  }
+
+  var qty = 0, n = 0;
+  S.cases.forEach(function (c) {
+    if (confOf(c)) return;                     // ยืนยันแล้ว = ราคาถูกล็อกไว้แล้ว ไม่กระทบ
+    var p = parseDrugText(c.drug);
+    if (normKey(p.generic) !== gen) return;
+    if (form && p.form && normForm(p.form) !== form) return;
+    if (str && p.strength && normStrength(p.strength) !== str) return;
+    if (!(p.qty > 0)) return;
+    n++; qty += p.qty;
+  });
+
+  var unit = $('dgUnit').value || 'หน่วย';
+  if (!n) {
+    amt.textContent = baht(price) + ' ฿ / ' + unit;
+    txt.textContent = 'ยังไม่มีเคสที่รอการยืนยันและใช้ยาตัวนี้ ราคาที่ตั้งไว้จะถูกใช้เมื่อมีการยืนยันครั้งต่อไป';
+  } else {
+    amt.textContent = baht(price * qty) + ' ฿';
+    txt.textContent = 'ถ้าอาจารย์แพทย์ยืนยันว่าไม่สมเหตุผลทั้งหมด ' + n + ' เคสที่ยังรออยู่ (รวม ' +
+      qty.toLocaleString('en-US') + ' ' + unit + ') จะคิดเป็นเงินเท่านี้ · ' +
+      'เคสที่ยืนยันไปแล้วยังคงราคาเดิมที่ล็อกไว้';
+  }
+}
+
+function saveDrug() {
+  var err = $('dgErr'), btn = $('dgSave');
+  err.textContent = '';
+  var gen = String($('dgGen').value).trim().toUpperCase();
+  var price = String($('dgPrice').value).trim();
+  if (!gen) { err.textContent = 'กรุณากรอกชื่อสามัญของยา'; $('dgGen').focus(); return; }
+  if (!(Number(price.replace(/,/g, '')) >= 0)) { err.textContent = 'ราคาต่อหน่วยต้องเป็นตัวเลขและไม่ติดลบ'; $('dgPrice').focus(); return; }
+
+  btn.disabled = true;
+  api('drugSave', {
+    row: S.drugEdit ? S.drugEdit._row : 0,
+    generic: gen,
+    form: $('dgForm').value,
+    strength: String($('dgStr').value).trim(),
+    unit: $('dgUnit').value,
+    price_per_unit: price,
+    effective_from: String($('dgFrom').value).trim(),
+    active: $('dgActive').classList.contains('on') ? '1' : '0'
+  }).then(function (d) {
+    S.drugs = d.drugs || [];
+    toast(S.drugEdit ? 'บันทึก ' + gen + ' ลงชีตแล้ว' : 'เพิ่ม ' + gen + ' ลงชีตแล้ว');
+    closeDetail();
+    render();
+  }).catch(function (e) { err.textContent = e.message; btn.disabled = false; });
+}
+
+function deleteDrug() {
+  var d = S.drugEdit;
+  if (!d) return;
+  openModal(
+    '<h3 style="margin:0;font-family:var(--serif);font-size:18px">ลบ ' + esc(d.generic) + ' ออกจากชีต?</h3>' +
+    '<p style="margin:10px 0 0;font-size:13.5px;color:var(--muted);line-height:1.6">' +
+    'เคสที่อาจารย์แพทย์ยืนยันไปแล้วจะไม่ได้รับผลกระทบ เพราะราคาถูกล็อกไว้ตั้งแต่ตอนยืนยัน ' +
+    'สิ่งที่เปลี่ยนคือเคสที่เข้ามาใหม่จะจับคู่ราคาตัวนี้ไม่ได้อีก ' +
+    'ถ้าเพียงแค่ต้องการเลิกใช้ราคานี้ ให้ปิดใช้งานแทนจะย้อนดูได้ว่าเคยคิดราคาเท่าไหร่</p>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px;flex-wrap:wrap">' +
+      '<button class="btn-no" data-act="closeModal">ยกเลิก</button>' +
+      '<button class="btn-no" data-drug-off="' + esc(d._row) + '">ปิดใช้งานแทน</button>' +
+      '<button class="btn-ok" style="background:var(--red)" data-drug-del-go="' + esc(d._row) + '">ลบถาวร</button>' +
+    '</div>');
+}
+
+function recalcPrices() {
+  openModal(
+    '<h3 style="margin:0;font-family:var(--serif);font-size:18px">คำนวณราคาย้อนหลังใหม่?</h3>' +
+    '<p style="margin:10px 0 0;font-size:13.5px;color:var(--muted);line-height:1.6">' +
+    'คำสั่งนี้จะเขียนทับค่ายาของทุกเคสที่ยืนยันว่าไม่สมเหตุผล ด้วยราคาที่ใช้งานอยู่ในตารางตอนนี้ ' +
+    'ใช้เมื่อ<b>กรอกราคาผิดตั้งแต่แรก</b>เท่านั้น ไม่ควรใช้เมื่อราคายาขึ้นตามปกติ ' +
+    'เพราะจะทำให้ตัวเลขของเดือนที่รายงานไปแล้วเปลี่ยน · การกดครั้งนี้จะถูกบันทึกไว้ใน AuditLog</p>' +
+    '<div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">' +
+      '<button class="btn-no" data-act="closeModal">ยกเลิก</button>' +
+      '<button class="btn-ok" data-act="recalcGo">คำนวณใหม่</button>' +
+    '</div>');
+}
+
 /* =========================================================== render: cases */
 
 function viewCases() {
@@ -1296,6 +1798,8 @@ function cssEsc(s) { return String(s).replace(/["\\]/g, '\\$&'); }
 /* ========================================================== render: detail */
 
 function openDetail(no) {
+  S.soMode = 'case';
+  S.drugEdit = null;
   S.detailNo = String(no);
   paintDetail();
   $('so').classList.add('on');
@@ -1303,11 +1807,14 @@ function openDetail(no) {
 }
 function closeDetail() {
   S.detailNo = null;
+  S.drugEdit = null;
+  S.soMode = 'case';
   $('so').classList.remove('on');
   if (!$('drawer').classList.contains('on')) $('scrim').classList.remove('on');
 }
 
 function paintDetail() {
+  if (S.soMode === 'drug') return;          // แถบด้านข้างกำลังแสดงฟอร์มราคายาอยู่
   var c = S.cases.filter(function (x) { return String(x.no) === S.detailNo; })[0];
   if (!c) { closeDetail(); return; }
   $('soTitle').textContent = 'เคส ' + c.no;
@@ -1870,8 +2377,47 @@ function closeDrawer() {
 }
 
 document.addEventListener('click', function (e) {
-  var t = e.target.closest('[data-page],[data-act],[data-case],[data-open],[data-approve],[data-reject],[data-toggle-active]');
+  var t = e.target.closest('[data-page],[data-act],[data-case],[data-open],[data-approve],[data-reject],' +
+    '[data-toggle-active],[data-df],[data-drug-edit],[data-drug-del],[data-drug-off],[data-drug-del-go]');
   if (!t) return;
+
+  /* ---- หน้าราคายา ---- */
+  if (t.hasAttribute('data-df')) {
+    S.df = t.getAttribute('data-df');
+    render();
+    return;
+  }
+  if (t.hasAttribute('data-drug-edit')) { openDrugForm(t.getAttribute('data-drug-edit')); return; }
+  if (t.hasAttribute('data-drug-del')) {
+    S.drugEdit = S.drugs.filter(function (d) { return String(d._row) === t.getAttribute('data-drug-del'); })[0] || null;
+    if (S.drugEdit) deleteDrug();
+    return;
+  }
+  if (t.hasAttribute('data-drug-off')) {
+    var offRow = t.getAttribute('data-drug-off');
+    var dOff = S.drugs.filter(function (d) { return String(d._row) === offRow; })[0];
+    if (!dOff) { closeModal(); return; }
+    api('drugSave', {
+      row: dOff._row, generic: dOff.generic, form: dOff.form, strength: dOff.strength,
+      unit: dOff.unit, price_per_unit: dOff.price_per_unit,
+      effective_from: dOff.effective_from, active: '0'
+    }).then(function (d) {
+      S.drugs = d.drugs || [];
+      toast('ปิดใช้งาน ' + dOff.generic + ' แล้ว ราคาย้อนหลังยังอยู่ครบ');
+      closeModal(); closeDetail(); render();
+    }).catch(function (err) { toast(err.message); });
+    return;
+  }
+  if (t.hasAttribute('data-drug-del-go')) {
+    var delRow = t.getAttribute('data-drug-del-go');
+    var dDel = S.drugs.filter(function (d) { return String(d._row) === delRow; })[0];
+    api('drugDelete', { row: delRow }).then(function (d) {
+      S.drugs = d.drugs || [];
+      toast('ลบ ' + (dDel ? dDel.generic : 'รายการยา') + ' ออกจากชีตแล้ว');
+      closeModal(); closeDetail(); render();
+    }).catch(function (err) { toast(err.message); });
+    return;
+  }
 
   if (t.hasAttribute('data-page')) { setPage(t.getAttribute('data-page')); return; }
   if (t.hasAttribute('data-case')) { openDetail(t.getAttribute('data-case')); return; }
@@ -1901,6 +2447,23 @@ document.addEventListener('click', function (e) {
 
   switch (t.getAttribute('data-act')) {
     case 'syncNow': toast('กำลังดึงข้อมูลจากชีต…'); quietReload(); break;
+    case 'drugNew':
+      if (!canEditDrugs()) { toast('ต้องเข้าสู่ระบบด้วยบัญชีอาจารย์แพทย์หรือผู้ดูแลระบบ'); loginModal(); break; }
+      openDrugForm(null);
+      break;
+    case 'recalc': recalcPrices(); break;
+    case 'recalcGo':
+      closeModal();
+      toast('กำลังคำนวณราคาย้อนหลังใหม่…');
+      api('recalcPrices', {}).then(function (d) {
+        (d.confirmations || []).forEach(function (r) {
+          var k = String(r.case_no || '').trim();
+          if (k) S.confirmations[k] = r;
+        });
+        toast(d.updated ? 'คำนวณใหม่แล้ว เปลี่ยน ' + d.updated + ' เคส' : 'ตัวเลขตรงกับราคาปัจจุบันอยู่แล้ว ไม่มีอะไรเปลี่ยน');
+        render();
+      }).catch(function (err) { toast(err.message); });
+      break;
     case 'login': loginModal(); break;
     case 'loginModal': loginModal(); break;
     case 'registerModal': registerModal(); break;
@@ -1950,6 +2513,17 @@ document.addEventListener('change', function (e) {
 });
 
 document.addEventListener('input', function (e) {
+  if (e.target.hasAttribute && e.target.hasAttribute('data-dq')) {
+    S.dq = e.target.value;
+    clearTimeout(document._dqt);
+    var dpos = e.target.selectionStart;
+    document._dqt = setTimeout(function () {
+      render();
+      var back = document.querySelector('[data-dq]');
+      if (back) { back.focus(); try { back.setSelectionRange(dpos, dpos); } catch (x) {} }
+    }, 220);
+    return;
+  }
   if (e.target.hasAttribute && e.target.hasAttribute('data-f') && e.target.tagName === 'INPUT') {
     S.f[e.target.getAttribute('data-f')] = e.target.value;
     clearTimeout(document._qt);
