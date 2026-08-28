@@ -324,6 +324,10 @@ a{color:var(--red)}
 .warnbox b{display:block;margin-bottom:3px}
 .warnbox ul{margin:6px 0 0;padding-left:20px}
 .warnbox button{color:inherit;text-decoration:underline;text-underline-offset:2px;font:inherit}
+.warnbox .warnact{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin-top:13px;
+  padding-top:12px;border-top:1px solid #F0DCC6}
+.warnbox .warnact button{text-decoration:none;color:#fff}
+.warnbox .warnact span{font-size:12.5px;flex:1;min-width:200px}
 .dtool{display:flex;gap:9px;align-items:center;flex-wrap:wrap;margin-top:14px}
 .dtool input[type=search]{flex:1;min-width:190px;border:1px solid var(--line-2);border-radius:var(--r);
   padding:9px 11px;background:#fff;font-size:14px}
@@ -360,6 +364,12 @@ a{color:var(--red)}
   padding:10px 11px;background:#fff;font-size:14.5px;width:100%}
 .dform .hint{font-size:12px;color:var(--muted);line-height:1.5}
 .dform .two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.dform .pair{display:grid;grid-template-columns:1fr 92px;gap:7px}
+.dform .money{display:flex;align-items:center;gap:5px}
+.dform .money input{text-align:right}
+.dform .money #dgSat{width:58px;flex:none;text-align:left}
+.dform .money .sep{font-family:var(--mono);font-size:18px;font-weight:600;color:var(--muted)}
+.dform .money .cur{font-size:13.5px;color:var(--muted);white-space:nowrap}
 .dsw{display:flex;align-items:center;gap:11px;border:1px solid var(--line);border-radius:var(--r);
   padding:11px 13px;background:#fff;width:100%;text-align:left}
 .dsw .t{width:38px;height:21px;border-radius:999px;background:#DFD6D7;position:relative;flex:none;transition:background .15s}
@@ -472,7 +482,7 @@ a{color:var(--red)}
 
 var API = '/api/rdu';
 /** ป้ายเวอร์ชัน — ใช้ตรวจว่าหน้าเว็บที่เปิดอยู่เป็นไฟล์ล่าสุดจริงหรือไม่ (แสดงท้ายหน้า) */
-var BUILD = '2026-08-28 · drug-price';
+var BUILD = '2026-08-28b · drug-price';
 /** ดึงข้อมูลจาก Google Sheets ซ้ำทุกกี่มิลลิวินาที (60000 = 1 นาที) */
 var REFRESH_MS = 60000;
 var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -597,7 +607,32 @@ function indicationsOf(c) {
 
 var DRUG_FORMS = ['CAP','CAPS','CAPSULE','TAB','TABS','TABLET','INJ','INJECTION','SYR','SYRUP',
                   'SUSP','SOLN','SOL','VIAL','AMP','AMPULE','SUPP','CREAM','OINT','GEL','DROP','POWDER'];
-var UNIT_OPTIONS = ['เม็ด','แคปซูล','ขวด','หลอด','ซอง','ampule','vial','ml'];
+/* หน่วยนับใช้ภาษาอังกฤษทั้งหมด ให้ตรงกับที่เขียนในคำสั่งยา */
+var UNIT_OPTIONS = ['tablet','capsule','vial','ampule','bottle','tube','sachet','syringe','ml','unit'];
+/* หน่วยความแรงของยา — เลขกับหน่วยแยกช่องกัน */
+var STRENGTH_UNITS = ['MG','GM','G','MCG','ML','IU','MU','%'];
+/* แถวเก่าที่เคยกรอกเป็นภาษาไทยไว้ แปลงให้อัตโนมัติตอนเปิดแก้ไข */
+var UNIT_TH2EN = { 'เม็ด':'tablet', 'แคปซูล':'capsule', 'ขวด':'vial', 'ไวแอล':'vial',
+                   'หลอด':'tube', 'ซอง':'sachet', 'หน่วย':'unit', 'มล.':'ml', 'แอมพูล':'ampule' };
+function unitEn(u) {
+  var v = String(u || '').trim();
+  return UNIT_TH2EN[v] || v;
+}
+/** แยก "300 MG" เป็น { num:'300', unit:'MG' } */
+function splitStrength(s) {
+  var m = String(s || '').trim().match(/^([\d.]+)\s*(.*)$/);
+  if (!m) return { num: '', unit: 'MG' };
+  return { num: m[1], unit: (m[2] || 'MG').toUpperCase() };
+}
+/** แยก "20.50" เป็น { baht:'20', satang:'50' } */
+function splitPrice(p) {
+  var raw = String(p === null || p === undefined ? '' : p).replace(/,/g, '').trim();
+  if (raw === '') return { baht: '', satang: '' };      // ฟอร์มเปล่าต้องว่างจริง ๆ ไม่ใช่ 0.00
+  var n = Number(raw);
+  if (!(n >= 0)) return { baht: '', satang: '' };
+  var fixed = n.toFixed(2).split('.');
+  return { baht: fixed[0], satang: fixed[1] };
+}
 
 function normKey(s) { return String(s || '').toUpperCase().replace(/[\s.\-_]/g, ''); }
 function normForm(f) {
@@ -692,6 +727,7 @@ function priceSummary(list) {
   var out = {
     saved: 0, savedCases: 0,          // ยืนยันว่าไม่สมเหตุผล + จับคู่ราคาได้
     unmatched: [],                    // ยืนยันว่าไม่สมเหตุผล แต่จับคู่ราคาไม่ได้
+    fixable: 0, fixableAmt: 0,        // ยืนยันก่อนมีราคา — กดคิดเงินย้อนหลังได้เลย
     pendingAmt: 0, pendingCases: 0,   // AI ว่าไม่สมเหตุผล แต่ยังไม่มีใครยืนยัน
     totalAmt: 0, totalCases: 0,       // ค่ายารวมทุกเคสตามราคาปัจจุบัน (ตัวหาร)
     byDrug: {}
@@ -714,8 +750,15 @@ function priceSummary(list) {
         var key = live.parsed.generic || '(ไม่ทราบชื่อยา)';
         var g = out.byDrug[key] || (out.byDrug[key] = { cases: 0, amount: 0 });
         g.cases++; g.amount += amt;
+      } else if (live.matched) {
+        /* ตอนนี้มีราคาในตารางแล้ว แต่ตอนกดยืนยันยังไม่มี ค่ายาเลยถูกล็อกเป็นค่าว่าง
+           แก้ได้ด้วยปุ่ม "คิดเงินย้อนหลัง" ไม่ต้องยกเลิกการยืนยันแล้วยืนยันใหม่ */
+        out.fixable++;
+        out.fixableAmt += live.amount;
+        out.unmatched.push({ c: c, fixable: true,
+          reason: 'ยืนยันไว้ก่อนที่จะมีราคาในตาราง — ตอนนี้คิดได้ ' + baht(live.amount) + ' บาทแล้ว' });
       } else {
-        out.unmatched.push({ c: c, reason: live.reason || 'จับคู่ราคาไม่ได้' });
+        out.unmatched.push({ c: c, fixable: false, reason: live.reason || 'จับคู่ราคาไม่ได้' });
       }
     } else if (!k && aiStatusOf(c) === 'irrational') {
       out.pendingCases++;
@@ -724,6 +767,7 @@ function priceSummary(list) {
   });
   out.saved = Math.round(out.saved * 100) / 100;
   out.pendingAmt = Math.round(out.pendingAmt * 100) / 100;
+  out.fixableAmt = Math.round(out.fixableAmt * 100) / 100;
   out.totalAmt = Math.round(out.totalAmt * 100) / 100;
   return out;
 }
@@ -1377,7 +1421,15 @@ function viewDrugs() {
           '<span class="mono">' + esc(x.c.drug || '(ไม่ระบุยา)') + '</span> — ' + esc(x.reason) + '</li>';
       }).join('') +
       (sum.unmatched.length > 12 ? '<li>และอีก ' + (sum.unmatched.length - 12) + ' เคส</li>' : '') +
-      '</ul></div></div>';
+      '</ul>' +
+      (sum.fixable && canEditDrugs()
+        ? '<div class="warnact"><button class="dbtn solid" data-act="reprice">' +
+          'คิดเงินย้อนหลังให้ ' + sum.fixable + ' เคสที่มีราคาแล้ว (+' + baht(sum.fixableAmt) + ' ฿)' +
+          '</button><span>ไม่ต้องยกเลิกการยืนยัน ระบบเติมเฉพาะเคสที่ยังไม่มีตัวเลข ' +
+          'จะไม่แตะเคสที่คิดเงินไปแล้วแม้แต่เคสเดียว</span></div>'
+        : (sum.fixable ? '<p style="margin:10px 0 0">มี ' + sum.fixable +
+            ' เคสที่คิดเงินย้อนหลังได้ทันที เข้าสู่ระบบด้วยบัญชีอาจารย์แพทย์เพื่อกดปุ่มนี้</p>' : '')) +
+      '</div></div>';
   }
 
   /* --- ตารางราคายา --- */
@@ -1408,7 +1460,7 @@ function viewDrugs() {
   } else {
     html += '<div class="tbl-wrap"><table class="tbl dtbl"><thead><tr>' +
       '<th>ชื่อสามัญ</th><th>รูปแบบ</th><th>ขนาด</th><th>หน่วยนับ</th>' +
-      '<th>ราคา/หน่วย (฿)</th><th>เริ่มใช้ราคานี้</th><th>สถานะ</th>' +
+      '<th>ราคา/หน่วย (฿)</th><th>บันทึกราคาเมื่อ</th><th>สถานะ</th>' +
       (canEditDrugs() ? '<th></th>' : '') + '</tr></thead><tbody>' +
       list.map(function (d) {
         var on = isOn(d.active);
@@ -1416,7 +1468,7 @@ function viewDrugs() {
           '<td><span class="dgen">' + esc(d.generic) + '</span></td>' +
           '<td>' + (d.form ? '<span class="dtag">' + esc(d.form) + '</span>' : '—') + '</td>' +
           '<td class="mono">' + esc(d.strength || '—') + '</td>' +
-          '<td>' + esc(d.unit || '—') + '</td>' +
+          '<td>' + esc(unitEn(d.unit) || '—') + '</td>' +
           '<td class="mono"><b>' + esc(d.price_per_unit || '—') + '</b></td>' +
           '<td class="mono">' + esc(d.effective_from || '—') + '</td>' +
           '<td><span class="dstate ' + (on ? 'on' : 'off') + '"><i></i>' + (on ? 'ใช้งาน' : 'ปิดใช้งาน') + '</span></td>' +
@@ -1458,41 +1510,65 @@ function openDrugForm(row) {
   S.detailNo = null;
   S.drugEdit = row ? (S.drugs.filter(function (d) { return String(d._row) === String(row); })[0] || null) : null;
   var d = S.drugEdit;
+  var st = splitStrength(d ? d.strength : '');
+  var pr = splitPrice(d ? d.price_per_unit : '');
+  var unit = d ? unitEn(d.unit) : 'tablet';
+  var unitList = UNIT_OPTIONS.slice();
+  if (unit && unitList.indexOf(unit) < 0) unitList.unshift(unit);   // หน่วยแปลก ๆ ของเดิมต้องไม่หาย
+  var strUnits = STRENGTH_UNITS.slice();
+  if (st.unit && strUnits.indexOf(st.unit) < 0) strUnits.unshift(st.unit);
 
   $('soTitle').textContent = d ? 'แก้ไข ' + (d.generic || 'รายการยา') : 'เพิ่มรายการยา';
   $('soBody').innerHTML =
     '<div class="dform">' +
+
       '<div class="fld"><label for="dgGen">ชื่อสามัญ (generic)</label>' +
-        '<input id="dgGen" class="mono" placeholder="CEFAZOLIN" value="' + esc(d ? d.generic : '') + '">' +
-        '<span class="hint">พิมพ์เป็นภาษาอังกฤษตัวพิมพ์ใหญ่ให้ตรงกับที่ปรากฏในคำสั่งยา</span></div>' +
+        '<input id="dgGen" class="mono" placeholder="CEFAZOLIN" autocapitalize="characters" ' +
+          'spellcheck="false" value="' + esc(d ? d.generic : '') + '">' +
+        '<span class="hint">พิมพ์ได้เฉพาะภาษาอังกฤษ ตัวเล็กจะถูกเปลี่ยนเป็นตัวใหญ่ให้เอง</span></div>' +
+
       '<div class="two">' +
         '<div class="fld"><label for="dgForm">รูปแบบยา</label>' +
           '<select id="dgForm">' + ['', 'CAP', 'TAB', 'INJ', 'SYR', 'SUPP', 'CREAM'].map(function (f) {
             return '<option value="' + f + '"' + (d && String(d.form).toUpperCase() === f ? ' selected' : '') +
               '>' + (f || '— ไม่ระบุ —') + '</option>';
           }).join('') + '</select></div>' +
-        '<div class="fld"><label for="dgStr">ขนาด</label>' +
-          '<input id="dgStr" class="mono" placeholder="1 GM" value="' + esc(d ? d.strength : '') + '"></div>' +
+        '<div class="fld"><label for="dgStrNum">ขนาด</label>' +
+          '<div class="pair">' +
+            '<input id="dgStrNum" class="mono" inputmode="decimal" placeholder="300" value="' + esc(st.num) + '">' +
+            '<select id="dgStrUnit">' + strUnits.map(function (u) {
+              return '<option value="' + esc(u) + '"' + (st.unit === u ? ' selected' : '') + '>' + esc(u) + '</option>';
+            }).join('') + '</select>' +
+          '</div></div>' +
       '</div>' +
+
       '<div class="two">' +
         '<div class="fld"><label for="dgUnit">หน่วยนับ</label>' +
-          '<select id="dgUnit">' + UNIT_OPTIONS.map(function (u) {
-            return '<option value="' + esc(u) + '"' + (d && d.unit === u ? ' selected' : '') + '>' + esc(u) + '</option>';
+          '<select id="dgUnit">' + unitList.map(function (u) {
+            return '<option value="' + esc(u) + '"' + (unit === u ? ' selected' : '') + '>' + esc(u) + '</option>';
           }).join('') + '</select></div>' +
-        '<div class="fld"><label for="dgPrice">ราคาต่อหน่วย (บาท)</label>' +
-          '<input id="dgPrice" class="mono" inputmode="decimal" placeholder="28.00" value="' +
-            esc(d ? d.price_per_unit : '') + '"></div>' +
+        '<div class="fld"><label for="dgBaht">ราคาต่อหน่วย</label>' +
+          '<div class="money">' +
+            '<input id="dgBaht" class="mono" inputmode="numeric" placeholder="28" value="' + esc(pr.baht) + '">' +
+            '<span class="sep">.</span>' +
+            '<input id="dgSat" class="mono" inputmode="numeric" placeholder="00" maxlength="2" value="' + esc(pr.satang) + '">' +
+            '<span class="cur">บาท</span>' +
+          '</div>' +
+          '<span class="hint">ช่องซ้ายคือบาท ช่องขวาคือสตางค์ 2 ตำแหน่ง</span></div>' +
       '</div>' +
-      '<div class="fld"><label for="dgFrom">เริ่มใช้ราคานี้ตั้งแต่</label>' +
-        '<input id="dgFrom" class="mono" placeholder="2569-04-01" value="' + esc(d ? d.effective_from : '') + '">' +
-        '<span class="hint">ราคาเปลี่ยนอย่าลบแถวเดิม — ปิดใช้งานแถวเดิมแล้วเพิ่มแถวใหม่ ' +
-        'ตัวเลขย้อนหลังถูกล็อกไว้แล้วจึงไม่กระทบอยู่ดี แต่จะย้อนดูได้ว่าเคยคิดราคาเท่าไหร่</span></div>' +
+
       '<button class="dsw' + (!d || isOn(d.active) ? ' on' : '') + '" id="dgActive" ' +
         'aria-pressed="' + (!d || isOn(d.active) ? 'true' : 'false') + '">' +
         '<span class="t"></span><span class="lb">ใช้งานราคานี้' +
         '<small>เฉพาะแถวที่ใช้งานอยู่เท่านั้นที่ถูกนำไปคิดเงิน</small></span></button>' +
+
       '<div class="dprev"><p class="eyebrow">ผลต่อการคำนวณ</p>' +
         '<div class="big" id="dgPvAmt">—</div><p id="dgPvTxt"></p></div>' +
+
+      '<p class="hint">วันที่เริ่มใช้ราคานี้ถูกบันทึกให้อัตโนมัติตอนกดบันทึก ' +
+        (d && d.effective_from ? '(ครั้งล่าสุด ' + esc(d.effective_from) + ')' : '') +
+        ' · เคสที่ยืนยันไปแล้วยังคงใช้ราคาเดิมที่ล็อกไว้ ไม่เปลี่ยนตาม</p>' +
+
       '<div class="derr" id="dgErr"></div>' +
       '<div class="dfoot">' +
         '<button class="dbtn solid" id="dgSave">บันทึกลงชีต</button>' +
@@ -1504,7 +1580,32 @@ function openDrugForm(row) {
   $('so').classList.add('on');
   $('scrim').classList.add('on');
   bindDrugForm();
-  $('dgGen').focus();          // โฟกัสทันที ไม่หน่วงเวลา กันไม่ให้เคอร์เซอร์กระโดดถ้าผู้ใช้พิมพ์ช่องอื่นก่อน
+  $('dgGen').focus();
+}
+
+/** ช่องที่รับได้เฉพาะภาษาอังกฤษตัวพิมพ์ใหญ่ ตัวเลข และเครื่องหมายไม่กี่ตัว */
+function bindUpperAscii(el) {
+  el.addEventListener('input', function () {
+    var before = el.value, pos = el.selectionStart;
+    var after = before.toUpperCase().replace(/[^A-Z0-9 +\/\-.]/g, '');
+    if (after === before) return;
+    el.value = after;
+    var back = pos - (before.length - after.length);
+    try { el.setSelectionRange(back, back); } catch (e) {}
+  });
+}
+
+/** ช่องที่รับได้เฉพาะตัวเลข (จำกัดจำนวนหลักได้) */
+function bindDigits(el, maxLen) {
+  el.addEventListener('input', function () {
+    var before = el.value, pos = el.selectionStart;
+    var after = before.replace(/[^\d]/g, '');
+    if (maxLen) after = after.slice(0, maxLen);
+    if (after === before) return;
+    el.value = after;
+    var back = pos - (before.length - after.length);
+    try { el.setSelectionRange(back, back); } catch (e) {}
+  });
 }
 
 function bindDrugForm() {
@@ -1514,7 +1615,23 @@ function bindDrugForm() {
     act.classList.toggle('on', on);
     act.setAttribute('aria-pressed', on ? 'true' : 'false');
   });
-  ['dgGen', 'dgForm', 'dgStr', 'dgPrice', 'dgUnit'].forEach(function (id) {
+
+  bindUpperAscii($('dgGen'));
+  bindDigits($('dgBaht'), 7);
+  bindDigits($('dgSat'), 2);
+  $('dgStrNum').addEventListener('input', function () {
+    var el = $('dgStrNum');
+    el.value = el.value.replace(/[^\d.]/g, '').replace(/(\..*)\./g, '$1');
+  });
+  /* สตางค์ต้องมี 2 หลักเสมอ — เติมศูนย์ให้ตอนออกจากช่อง */
+  $('dgSat').addEventListener('blur', function () {
+    var el = $('dgSat');
+    if (el.value === '') { el.value = '00'; }
+    else if (el.value.length === 1) { el.value = el.value + '0'; }
+    drugPreview();
+  });
+
+  ['dgGen', 'dgForm', 'dgStrNum', 'dgStrUnit', 'dgBaht', 'dgSat', 'dgUnit'].forEach(function (id) {
     $(id).addEventListener('input', drugPreview);
     $(id).addEventListener('change', drugPreview);
   });
@@ -1524,15 +1641,27 @@ function bindDrugForm() {
   drugPreview();
 }
 
+/** ราคาที่กรอกอยู่ในฟอร์มตอนนี้ เป็นตัวเลข */
+function formPrice() {
+  var b = $('dgBaht').value === '' ? '0' : $('dgBaht').value;
+  var st = ($('dgSat').value + '00').slice(0, 2);
+  return Number(b + '.' + st);
+}
+/** ขนาดยาที่กรอกอยู่ เช่น "300 MG" */
+function formStrength() {
+  var n = String($('dgStrNum').value).trim();
+  return n ? n + ' ' + $('dgStrUnit').value : '';
+}
+
 /** บอกล่วงหน้าว่าราคาที่กำลังกรอกจะมีผลกับเคสไหนบ้าง (เฉพาะเคสที่ยังไม่ถูกยืนยัน) */
 function drugPreview() {
   var gen = normKey($('dgGen').value);
-  var price = Number(String($('dgPrice').value).replace(/,/g, ''));
+  var price = formPrice();
   var form = normForm($('dgForm').value);
-  var str = normStrength($('dgStr').value);
+  var str = normStrength(formStrength());
   var amt = $('dgPvAmt'), txt = $('dgPvTxt');
 
-  if (!gen || !(price >= 0)) {
+  if (!gen || !(price > 0)) {
     amt.textContent = '—';
     txt.textContent = 'กรอกชื่อสามัญและราคาต่อหน่วยเพื่อดูว่าราคานี้จะมีผลกับเคสไหนบ้าง';
     return;
@@ -1549,7 +1678,7 @@ function drugPreview() {
     n++; qty += p.qty;
   });
 
-  var unit = $('dgUnit').value || 'หน่วย';
+  var unit = $('dgUnit').value || 'unit';
   if (!n) {
     amt.textContent = baht(price) + ' ฿ / ' + unit;
     txt.textContent = 'ยังไม่มีเคสที่รอการยืนยันและใช้ยาตัวนี้ ราคาที่ตั้งไว้จะถูกใช้เมื่อมีการยืนยันครั้งต่อไป';
@@ -1565,22 +1694,24 @@ function saveDrug() {
   var err = $('dgErr'), btn = $('dgSave');
   err.textContent = '';
   var gen = String($('dgGen').value).trim().toUpperCase();
-  var price = String($('dgPrice').value).trim();
+  var price = formPrice();
   if (!gen) { err.textContent = 'กรุณากรอกชื่อสามัญของยา'; $('dgGen').focus(); return; }
-  if (!(Number(price.replace(/,/g, '')) >= 0)) { err.textContent = 'ราคาต่อหน่วยต้องเป็นตัวเลขและไม่ติดลบ'; $('dgPrice').focus(); return; }
+  if ($('dgBaht').value === '' && $('dgSat').value === '') {
+    err.textContent = 'กรุณากรอกราคาต่อหน่วย'; $('dgBaht').focus(); return;
+  }
+  if (!(price >= 0)) { err.textContent = 'ราคาต่อหน่วยไม่ถูกต้อง'; $('dgBaht').focus(); return; }
 
   btn.disabled = true;
   api('drugSave', {
     row: S.drugEdit ? S.drugEdit._row : 0,
     generic: gen,
     form: $('dgForm').value,
-    strength: String($('dgStr').value).trim(),
+    strength: formStrength(),
     unit: $('dgUnit').value,
-    price_per_unit: price,
-    effective_from: String($('dgFrom').value).trim(),
+    price_per_unit: price.toFixed(2),
     active: $('dgActive').classList.contains('on') ? '1' : '0'
-  }).then(function (d) {
-    S.drugs = d.drugs || [];
+  }).then(function (dd) {
+    S.drugs = dd.drugs || [];
     toast(S.drugEdit ? 'บันทึก ' + gen + ' ลงชีตแล้ว' : 'เพิ่ม ' + gen + ' ลงชีตแล้ว');
     closeDetail();
     render();
@@ -2450,6 +2581,21 @@ document.addEventListener('click', function (e) {
     case 'drugNew':
       if (!canEditDrugs()) { toast('ต้องเข้าสู่ระบบด้วยบัญชีอาจารย์แพทย์หรือผู้ดูแลระบบ'); loginModal(); break; }
       openDrugForm(null);
+      break;
+    case 'reprice':
+      if (!canEditDrugs()) { toast('ต้องเข้าสู่ระบบด้วยบัญชีอาจารย์แพทย์หรือผู้ดูแลระบบ'); loginModal(); break; }
+      toast('กำลังคิดเงินย้อนหลัง…');
+      api('repriceMissing', {}).then(function (d) {
+        (d.confirmations || []).forEach(function (r) {
+          var k = String(r.case_no || '').trim();
+          if (k) S.confirmations[k] = r;
+        });
+        toast(d.filled
+          ? 'คิดเงินย้อนหลังให้ ' + d.filled + ' เคสแล้ว' +
+            (d.stillMissing ? ' · ยังขาดราคาอีก ' + d.stillMissing + ' เคส' : '')
+          : 'ไม่มีเคสไหนที่คิดย้อนหลังได้ ต้องกรอกราคายาที่ขาดก่อน');
+        render();
+      }).catch(function (err) { toast(err.message); });
       break;
     case 'recalc': recalcPrices(); break;
     case 'recalcGo':
