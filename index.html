@@ -314,6 +314,21 @@ a{color:var(--red)}
 .badge.ok{border-color:var(--green);color:var(--green)}
 .badge.no{border-color:var(--red);color:var(--red)}
 
+/* ภาพรวม: แถบมูลค่าที่เลี่ยงได้ */
+.ovmoney{background:#fff;border:1px solid var(--line);border-left:3px solid var(--green);
+  border-radius:var(--r);margin-top:16px;overflow:hidden}
+.ovmoney .m{background:#fff;padding:14px 17px;display:flex;flex-direction:column;gap:1px}
+.ovmoney .k{font-size:12.5px;color:var(--muted)}
+.ovmoney .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:30px;font-weight:600;line-height:1.25}
+.ovmoney .v small{font-size:14px;color:var(--muted);font-weight:400}
+.ovmoney .n{font-size:11.5px;color:var(--muted);line-height:1.45}
+.ovmoney .m.g .v{color:var(--green)}
+.ovmoney .m.o .v{color:var(--orange)}
+.ovwarn{margin:12px 0 0;font-size:13px;color:#8E4A11;background:#FDF4EC;border:1px solid var(--orange);
+  border-left:3px solid var(--orange);border-radius:var(--r);padding:10px 13px;line-height:1.55}
+.ovwarn button{color:inherit;font:inherit;text-decoration:underline;text-underline-offset:2px}
+.ovnote{margin:0 0 10px;font-size:12.5px;color:var(--muted)}
+
 /* ราคายา */
 .kpis.k5{grid-template-columns:repeat(5,1fr)}
 .rulebar{display:flex;border:1px solid var(--line);border-left:3px solid var(--green);
@@ -482,7 +497,7 @@ a{color:var(--red)}
 
 var API = '/api/rdu';
 /** ป้ายเวอร์ชัน — ใช้ตรวจว่าหน้าเว็บที่เปิดอยู่เป็นไฟล์ล่าสุดจริงหรือไม่ (แสดงท้ายหน้า) */
-var BUILD = '2026-08-28b · drug-price';
+var BUILD = '2026-08-28d · drug-price';
 /** ดึงข้อมูลจาก Google Sheets ซ้ำทุกกี่มิลลิวินาที (60000 = 1 นาที) */
 var REFRESH_MS = 60000;
 var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -1190,31 +1205,47 @@ function viewDashboard() {
   var t = tally(S.cases);
   var html = errorBox();
 
-  /* --- ภาพรวม --- */
+  var years = yearOptions();
+  var months = monthOptions(S.dash.year);
+  var periodCases = S.cases.filter(function (c) { return inPeriod(c, S.dash.year, S.dash.month); });
+  var pt = tally(periodCases);
+  var ps = priceSummary(periodCases);          // มูลค่าที่เลี่ยงได้ของช่วงเวลาที่เลือก
+
+  /* --- ภาพรวม: สัดส่วนความสมเหตุผล + มูลค่าที่เลี่ยงได้ ของช่วงเวลาเดียวกัน --- */
   html += '<div class="card"><div class="card-h"><div>' +
-    '<p class="eyebrow">ภาพรวม</p>' +
+    '<p class="eyebrow">ภาพรวม · ' + esc(periodLabel()) + '</p>' +
     '<h3 style="font-size:15px;font-weight:500;color:var(--muted);font-family:var(--sans)">' +
     'สัดส่วนจากเคสที่มีผลแล้ว — ผลอาจารย์แพทย์มาก่อน ถ้ายังไม่มีใช้ผลเบื้องต้นจาก AI</h3></div>' +
     '<div class="legend">' +
     '<span><i style="background:var(--green)"></i>สมเหตุผล</span>' +
-    '<span><i style="background:var(--red)"></i>ไม่สมเหตุผล</span></div></div>';
-  if (t.done === 0) {
-    html += '<div class="empty" style="background:var(--red-l);border-radius:var(--r);margin-top:14px">ยังไม่มีเคสที่อาจารย์แพทย์ประเมิน</div>';
+    '<span><i style="background:var(--red)"></i>ไม่สมเหตุผล</span></div></div>' +
+    periodPicker(years, months, pt);
+
+  if (pt.done === 0) {
+    html += '<div class="empty" style="background:var(--red-l);border-radius:var(--r);margin-top:14px">' +
+      (pt.total ? 'ยังไม่มีเคสที่ประเมินแล้วในช่วงเวลานี้' : 'ไม่มีเคสในช่วงเวลาที่เลือก') + '</div>';
   } else {
-    var pg = pct(t.rational, t.done), pr = 100 - pg;
+    var pg = pct(pt.rational, pt.done), pr = 100 - pg;
     html += '<div class="ovbar">' +
       (pg > 0 ? '<div class="g" style="width:' + pg + '%">' + (pg >= 12 ? fmtPct(pg) : '') + '</div>' : '') +
       (pr > 0 ? '<div class="r" style="width:' + pr + '%">' + (pr >= 12 ? fmtPct(pr) : '') + '</div>' : '') +
       '</div>';
   }
+
+  /* มูลค่าที่เลี่ยงได้ — นับเฉพาะเคสที่อาจารย์แพทย์ยืนยันว่าไม่สมเหตุผล */
+  html += '<div class="ovmoney">' +
+    '<div class="m g"><span class="k">มูลค่าที่เลี่ยงได้</span>' +
+      '<span class="v">' + baht(ps.saved) + '<small> ฿</small></span>' +
+      '<span class="n">จาก ' + ps.savedCases + ' เคสที่อาจารย์แพทย์ยืนยันว่าไม่สมเหตุผล</span></div>' +
+    '</div>';
+
+  if (ps.unmatched.length) {
+    html += '<p class="ovwarn">มี ' + ps.unmatched.length + ' เคสที่ยืนยันว่าไม่สมเหตุผลแล้วแต่ยังคิดเงินไม่ได้ ' +
+      'มูลค่าจริงจึงสูงกว่าที่แสดง · <button data-page="drugs">ดูและแก้ที่หน้าราคายา</button></p>';
+  }
   html += '</div>';
 
   /* --- ทะเบียนเคส --- */
-  var years = yearOptions();
-  var months = monthOptions(S.dash.year);
-  var periodCases = S.cases.filter(function (c) { return inPeriod(c, S.dash.year, S.dash.month); });
-  var pt = tally(periodCases);
-
   html += '<div class="card"><div class="card-h"><div>' +
     '<p class="eyebrow">ทะเบียนเคส</p><h3>ผลประเมินรายเคสทั้งหมด</h3></div>' +
     '<div class="legend">' +
@@ -1222,18 +1253,11 @@ function viewDashboard() {
     '<span><i style="background:var(--red)"></i>ไม่สมเหตุผล</span>' +
     '<span><i style="background:#CFC6C7"></i>รอประเมิน</span>' +
     '<span style="color:var(--green)">✓ อาจารย์แพทย์ยืนยันแล้ว</span></div></div>' +
-    '<div class="reg-ctl">' +
-    '<div class="fld"><label>ปี พ.ศ.</label><select data-dash="year"><option value="">ทุกปี</option>' +
-      years.map(function (y) {
-        return '<option value="' + y + '"' + (String(S.dash.year) === String(y) ? ' selected' : '') + '>' + y + '</option>';
-      }).join('') + '</select></div>' +
-    '<div class="fld"><label>เดือน</label><select data-dash="month"><option value="">ทุกเดือน</option>' +
-      months.map(function (m) {
-        return '<option value="' + m + '"' + (String(S.dash.month) === String(m) ? ' selected' : '') + '>' + TH_MONTHS[m - 1] + '</option>';
-      }).join('') + '</select></div>' +
-    '<div class="reg-note">' + (pt.total
-      ? 'ช่วงที่เลือกมี ' + pt.total + ' เคส · สมเหตุผล ' + pt.rational + ' · ไม่สมเหตุผล ' + pt.irrational + ' · รอประเมิน ' + pt.pending
-      : 'ไม่มีเคสในช่วงเวลาที่เลือก') + '</div></div>';
+    '<div class="reg-ctl"><div class="reg-note">' +
+      '<b>' + esc(periodLabel()) + '</b> · ' + (pt.total
+        ? pt.total + ' เคส · สมเหตุผล ' + pt.rational + ' · ไม่สมเหตุผล ' + pt.irrational + ' · รอประเมิน ' + pt.pending
+        : 'ไม่มีเคสในช่วงเวลานี้') +
+      ' · เปลี่ยนช่วงเวลาได้ที่การ์ดภาพรวมด้านบน</div></div>';
 
   if (!periodCases.length) {
     html += '<div class="empty">ไม่มีเคสในช่วงเวลาที่เลือก</div>';
@@ -1250,6 +1274,7 @@ function viewDashboard() {
   html += '</div>';
 
   /* --- KPI --- */
+  html += '<p class="ovnote">ตัวเลขด้านล่างนี้นับเคสทุกช่วงเวลา ไม่ขึ้นกับปี/เดือนที่เลือกด้านบน</p>';
   html += '<div class="kpis">' +
     kpi('เคสทั้งหมด', t.total, 'ใบสั่งยาปฏิชีวนะ', '') +
     kpi('สมเหตุผล', t.rational, 'รวมผลเบื้องต้นจาก AI', 'g') +
@@ -1322,6 +1347,31 @@ function viewDashboard() {
   }
   html += '</div>';
   return html;
+}
+
+/** ป้ายบอกช่วงเวลาที่เลือกอยู่ เช่น "สิงหาคม 2569" หรือ "ทุกช่วงเวลา" */
+function periodLabel() {
+  var y = S.dash.year, m = S.dash.month;
+  if (!y && !m) return 'ทุกช่วงเวลา';
+  if (y && !m) return 'ปี พ.ศ. ' + y;
+  if (!y && m) return 'เดือน' + TH_MONTHS[Number(m) - 1] + ' ทุกปี';
+  return TH_MONTHS[Number(m) - 1] + ' ' + y;
+}
+
+/** ตัวเลือกปี/เดือน — ใช้ร่วมกันทุกการ์ดบนแดชบอร์ด เลือกที่ไหนก็เลื่อนตามกันหมด */
+function periodPicker(years, months, pt) {
+  return '<div class="reg-ctl">' +
+    '<div class="fld"><label>ปี พ.ศ.</label><select data-dash="year"><option value="">ทุกปี</option>' +
+      years.map(function (y) {
+        return '<option value="' + y + '"' + (String(S.dash.year) === String(y) ? ' selected' : '') + '>' + y + '</option>';
+      }).join('') + '</select></div>' +
+    '<div class="fld"><label>เดือน</label><select data-dash="month"><option value="">ทุกเดือน</option>' +
+      months.map(function (m) {
+        return '<option value="' + m + '"' + (String(S.dash.month) === String(m) ? ' selected' : '') + '>' + TH_MONTHS[m - 1] + '</option>';
+      }).join('') + '</select></div>' +
+    '<div class="reg-note">' + (pt.total
+      ? 'ช่วงที่เลือกมี ' + pt.total + ' เคส · สมเหตุผล ' + pt.rational + ' · ไม่สมเหตุผล ' + pt.irrational + ' · รอประเมิน ' + pt.pending
+      : 'ไม่มีเคสในช่วงเวลาที่เลือก') + '</div></div>';
 }
 
 function kpi(k, v, n, cls) {
