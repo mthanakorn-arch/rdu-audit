@@ -315,15 +315,20 @@ a{color:var(--red)}
 .badge.no{border-color:var(--red);color:var(--red)}
 
 /* ภาพรวม: แถบมูลค่าที่เลี่ยงได้ */
-.ovmoney{background:#fff;border:1px solid var(--line);border-left:3px solid var(--green);
-  border-radius:var(--r);margin-top:16px;overflow:hidden}
-.ovmoney .m{background:#fff;padding:14px 17px;display:flex;flex-direction:column;gap:1px}
+.ovmoney{display:grid;grid-template-columns:repeat(3,1fr);gap:1px;background:var(--line);
+  border:1px solid var(--line);border-radius:var(--r);margin-top:16px;overflow:hidden}
+.ovmoney .m{background:#fff;padding:14px 17px;display:flex;flex-direction:column;gap:1px;
+  border-left:3px solid transparent}
+.ovmoney .m.g{border-left-color:var(--green)}
+.ovmoney .m.ai{border-left-color:var(--gray)}
 .ovmoney .k{font-size:12.5px;color:var(--muted)}
-.ovmoney .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:30px;font-weight:600;line-height:1.25}
+.ovmoney .v{font-family:var(--mono);font-variant-numeric:tabular-nums;font-size:26px;font-weight:600;line-height:1.25}
 .ovmoney .v small{font-size:14px;color:var(--muted);font-weight:400}
 .ovmoney .n{font-size:11.5px;color:var(--muted);line-height:1.45}
 .ovmoney .m.g .v{color:var(--green)}
+.ovmoney .m.ai .v{color:var(--gray)}
 .ovmoney .m.o .v{color:var(--orange)}
+@media (max-width:900px){ .ovmoney{grid-template-columns:1fr} }
 .ovwarn{margin:12px 0 0;font-size:13px;color:#8E4A11;background:#FDF4EC;border:1px solid var(--orange);
   border-left:3px solid var(--orange);border-radius:var(--r);padding:10px 13px;line-height:1.55}
 .ovwarn button{color:inherit;font:inherit;text-decoration:underline;text-underline-offset:2px}
@@ -497,7 +502,7 @@ a{color:var(--red)}
 
 var API = '/api/rdu';
 /** ป้ายเวอร์ชัน — ใช้ตรวจว่าหน้าเว็บที่เปิดอยู่เป็นไฟล์ล่าสุดจริงหรือไม่ (แสดงท้ายหน้า) */
-var BUILD = '2026-08-28d · drug-price';
+var BUILD = '2026-09-01 · drug-price';
 /** ดึงข้อมูลจาก Google Sheets ซ้ำทุกกี่มิลลิวินาที (60000 = 1 นาที) */
 var REFRESH_MS = 60000;
 var TH_MONTHS = ['มกราคม','กุมภาพันธ์','มีนาคม','เมษายน','พฤษภาคม','มิถุนายน',
@@ -742,6 +747,7 @@ function priceSummary(list) {
   var out = {
     saved: 0, savedCases: 0,          // ยืนยันว่าไม่สมเหตุผล + จับคู่ราคาได้
     unmatched: [],                    // ยืนยันว่าไม่สมเหตุผล แต่จับคู่ราคาไม่ได้
+    aiAmt: 0, aiCases: 0,             // ทุกเคสที่ AI ว่าไม่สมเหตุผล (รวมที่ยืนยันแล้ว)
     fixable: 0, fixableAmt: 0,        // ยืนยันก่อนมีราคา — กดคิดเงินย้อนหลังได้เลย
     pendingAmt: 0, pendingCases: 0,   // AI ว่าไม่สมเหตุผล แต่ยังไม่มีใครยืนยัน
     totalAmt: 0, totalCases: 0,       // ค่ายารวมทุกเคสตามราคาปัจจุบัน (ตัวหาร)
@@ -757,6 +763,13 @@ function priceSummary(list) {
        ทำแบบนี้ตัวเศษจึงเป็นส่วนหนึ่งของตัวหารเสมอ สัดส่วนไม่มีวันเกิน 100% */
     if (locked > 0) { out.totalAmt += locked; out.totalCases++; }
     else if (live.matched) { out.totalAmt += live.amount; out.totalCases++; }
+
+    /* ยอดฝั่ง AI — นับทุกเคสที่ AI ว่าไม่สมเหตุผล ไม่ว่าจะยืนยันแล้วหรือยัง
+       เคสที่ยืนยันแล้วใช้ราคาที่ล็อกไว้ เคสที่ยังไม่ยืนยันใช้ราคาปัจจุบัน */
+    if (aiStatusOf(c) === 'irrational') {
+      out.aiCases++;
+      out.aiAmt += (locked > 0 ? locked : (live.matched ? live.amount : 0));
+    }
 
     if (k && k.status === 'irrational') {
       var amt = locked;
@@ -783,6 +796,7 @@ function priceSummary(list) {
   out.saved = Math.round(out.saved * 100) / 100;
   out.pendingAmt = Math.round(out.pendingAmt * 100) / 100;
   out.fixableAmt = Math.round(out.fixableAmt * 100) / 100;
+  out.aiAmt = Math.round(out.aiAmt * 100) / 100;
   out.totalAmt = Math.round(out.totalAmt * 100) / 100;
   return out;
 }
@@ -1234,9 +1248,15 @@ function viewDashboard() {
 
   /* มูลค่าที่เลี่ยงได้ — นับเฉพาะเคสที่อาจารย์แพทย์ยืนยันว่าไม่สมเหตุผล */
   html += '<div class="ovmoney">' +
-    '<div class="m g"><span class="k">มูลค่าที่เลี่ยงได้</span>' +
+    '<div class="m g"><span class="k">มูลค่าที่เลี่ยงได้จริง หลังยืนยัน</span>' +
       '<span class="v">' + baht(ps.saved) + '<small> ฿</small></span>' +
-      '<span class="n">จาก ' + ps.savedCases + ' เคสที่อาจารย์แพทย์ยืนยันว่าไม่สมเหตุผล</span></div>' +
+      '<span class="n">จาก ' + ps.savedCases + ' เคสที่อาจารย์แพทย์ยืนยันว่าไม่สมเหตุผล · ราคาถูกล็อกไว้ตอนยืนยัน</span></div>' +
+    '<div class="m ai"><span class="k">AI ประเมินว่าเลี่ยงได้</span>' +
+      '<span class="v">' + baht(ps.aiAmt) + '<small> ฿</small></span>' +
+      '<span class="n">จาก ' + ps.aiCases + ' เคสที่ AI ว่าไม่สมเหตุผล · ผลชั่วคราว รวมเคสที่ยืนยันแล้วด้วย</span></div>' +
+    '<div class="m"><span class="k">ค่าใช้จ่ายทั้งหมด</span>' +
+      '<span class="v">' + baht(ps.totalAmt) + '<small> ฿</small></span>' +
+      '<span class="n">ค่ายาปฏิชีวนะรวมทุกเคสที่คิดราคาได้ ' + ps.totalCases + ' เคส</span></div>' +
     '</div>';
 
   if (ps.unmatched.length) {
